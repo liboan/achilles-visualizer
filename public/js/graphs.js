@@ -29,7 +29,7 @@ function targetGraph(arrays, sort, zoom) { //graph of targets & predictions. sor
 
 	//graph size
 	var width = arrays[0].length * zoom;
-	var height = 200 + 20 * zoom;
+	var height = 200;
 	//merge three arrays into one
 	var data = []; //empty matrix. 0 = names, 1 = predictions, 2 = targets
 	for (var i = 0; i < arrays[0].length; i++) {
@@ -52,6 +52,7 @@ function targetGraph(arrays, sort, zoom) { //graph of targets & predictions. sor
 		.append("div")
 		.attr("id","targetGraph")
 		.append("div")
+		.attr("id", "targetGraphWrapper")
 		.style("overflow-x","auto")
 		.append("svg")
 		.attr("width", width)
@@ -157,16 +158,19 @@ function targetGraph(arrays, sort, zoom) { //graph of targets & predictions. sor
 
 
 	chart.on("mouseover", function() { //display tooltip upon mouseover
-		index = Math.floor(event.pageX / barWidth);
+		var index = Math.floor(event.pageX / barWidth);
 
 		tooltip.style("visibility", "visible");
 
 			
 		tooltip.selectAll("*").remove(); //clean up tooltip
 
-		cornerX = event.pageX;
-		cornerY = event.pageY;
-		width = 0;
+		var scrollX = $("#targetGraphWrapper").scrollLeft();
+
+		var cornerX = event.pageX + scrollX;
+		var cornerY = event.pageY;
+
+		var width = 0;
 
 		tooltip.append("text")
 			.attr("x", cornerX + 10)
