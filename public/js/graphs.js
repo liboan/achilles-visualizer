@@ -166,19 +166,15 @@ function targetGraph(arrays, sort, zoom) { //graph of targets & predictions. sor
 
 		cornerX = event.pageX;
 		cornerY = event.pageY;
-
-		tooltip.append("rect")
-			.attr("width", 400)
-			.attr("height", 70)
-			.attr("x", cornerX)
-			.attr("y", cornerY)
-			.style("stroke", "red")
-			.style("fill", "white");
+		width = 0;
 
 		tooltip.append("text")
 			.attr("x", cornerX + 10)
 			.attr("y", cornerY + 20)
-			.text("Cell Line: " + data[index][0]);
+			.text("Cell Line: " + data[index][0])
+			.each(function() {
+				width = this.getBBox().width;
+			});
 
 		tooltip.append("text")
 			.attr("x", cornerX + 10)
@@ -192,6 +188,15 @@ function targetGraph(arrays, sort, zoom) { //graph of targets & predictions. sor
 
 		tooltip.selectAll("text")
 			.style("font-family", "arial");
+
+		tooltip.insert("rect", "text")
+			.attr("width", Math.max(240, width + 40))
+			.attr("height", 70)
+			.attr("x", cornerX)
+			.attr("y", cornerY)
+			.style("stroke", "red")
+			.style("fill", "white");
+
 	})
 	.on("mouseout", function () {
 		tooltip.style("visibility", "hidden");
