@@ -16,7 +16,7 @@ function setup() {
 	zoom = 2;
 	$.getJSON("/json", function (data) {
 		//get filtering options
-		filterOptions = ["ALL"];
+		filterOptions = [""];
 		for (var i = 0; i < data.cellline.length; i++) {
 			entry = data.cellline[i];
 			option = entry.substring(entry.indexOf("_") + 1);
@@ -31,6 +31,7 @@ function setup() {
 		d3.select("body")
 			.append("div")
 			.attr("id", "UI")
+			.style("position","fixed");
 
 		d3.select("#UI")
 			.append("input")
@@ -38,7 +39,7 @@ function setup() {
 			.attr("value", "Zoom in")
 			.on("click", function () {
 				zoom = Math.min(zoom+1,20);
-				loadGraphs(data,sort,zoom,0);
+				loadGraphs(data,sort,zoom,filterOptions[selectMenu.property("selectedIndex")]);
 			});
 
 		d3.select("#UI")
@@ -47,7 +48,7 @@ function setup() {
 			.attr("value", "Zoom out")
 			.on("click", function () {
 				zoom = Math.max(zoom-1,2);
-				loadGraphs(data,sort,zoom,0);
+				loadGraphs(data,sort,zoom,filterOptions[selectMenu.property("selectedIndex")]);
 			});
 
 		var selectMenu = d3.select("#UI")
@@ -70,7 +71,12 @@ function setup() {
 		var featureMenu = d3.select("#UI")
 			.append("select")
 			.attr("id", "features")
-			.attr("Value", "NONE");
+			.attr("Value", "NONE")
+			.on("change", function () {
+				console.log(featureMenu.property("selectedIndex"));
+				console.log(data.features[featureMenu.property("selectedIndex")]);
+				//featureScatter(data, featureMenu.property("selectedIndex"), filterOptions[selectMenu.property("selectedIndex")])
+			});
 
 		d3.select("#features")
 			.selectAll("option")
@@ -83,7 +89,7 @@ function setup() {
 
 
 
-		loadGraphs(data, 0, zoom, 0);
+		loadGraphs(data, 0, zoom, "");
 		a = data;
 
 		
@@ -93,16 +99,13 @@ function setup() {
 
 function loadGraphs(data, sort, zoom, filter) {
 	
-
-	if (filter !== 0) {
-		for (var i = 0; i < data.cellline.length; i++) {
-			// console.log(data.cellline[i] + " " + data.cellline[i].indexOf(filter));
-			if (data.cellline[i].indexOf(filter) === -1) {
-				
-			}
+	include = [];
+	for (var i = 0; i < data.cellline.length; i++) {
+		// console.log(data.cellline[i] + " " + data.cellline[i].indexOf(filter));
+		if (data.cellline[i].indexOf(filter) !== -1) {
+			include.push(i);			
 		}
 	}
-
 
 	d3.select("#graphWindow").remove();
 
@@ -111,21 +114,30 @@ function loadGraphs(data, sort, zoom, filter) {
 		.attr("id", "graphWindow")
 		.attr("overflow-x", "auto");
 	
-	targetGraph(data, sort, zoom, 0);
-	for (var i = 0; i < 100; i++) {
-		featureGraph(data, i, sort, zoom, 0);
+	targetGraph(data, sort, zoom, include);
+	for (var i = 0; i < 30; i++) {
+		featureGraph(data, i, sort, zoom, include);
 	}
 }
 
-function targetGraph(input, sort, zoom, exclude) { //graph of targets & predictions. sort controls what index to sort by, zoom controls width of graph
-												   //exclude lists indexes of things that are filtered out	
-	arrays = [input.cellline, input.predictions, input.target]; //the only ones we care about. 
+function targetGraph(input, sort, zoom, include) { //graph of targets & predictions. sort controls what index to sort by, zoom controls width of graph
+												   //include lists indexes of things that are not filtered out	
+	arrays = [[],[],[]]; //array of three arrays, cellline, predictions, and targets 
+	for (var i = 0; i < include.length; i++) {
+		arrays[0].push(input.cellline[include[i]]);
+		arrays[1].push(input.predictions[include[i]]);
+		arrays[2].push(input.target[include[i]]);
+	}
+	//arrays = [input.cellline, input.predictions, input.target]; //the only ones we care about. 
 
 	//graph size
 	var zoom = Math.max(2, Math.min(zoom, 20));
-	var width = input.cellline.length * zoom;
+	zoom = zoom * Math.min(10, Math.floor(430/include.length)); 
+
+	var width = arrays[0].length * zoom;
 	var height = 200;
 	var topPadding = 40;
+	var leftPadding = 30;
 
 	//merge three arrays into one
 	var data = []; //empty matrix. 0 = lineages, 1 = predictions, 2 = targets
@@ -156,16 +168,13 @@ function targetGraph(input, sort, zoom, exclude) { //graph of targets & predicti
 	d3.select("#graphWindow") //add graph body
 		.append("div")
 		.attr("id","targetGraph")
+		.style("padding-top", "40px")
 		.append("div")
 		.attr("id", "targetGraphWrapper")
 		.append("svg")
 		.style("pointer-events", "all")
-		.attr("width", width + 200)
+		.attr("width", width + 300)
 		.attr("height", height);
-
-	//add UI stuff
-
-
 
 	var chart = d3.select("#targetGraph svg");
 
@@ -174,7 +183,7 @@ function targetGraph(input, sort, zoom, exclude) { //graph of targets & predicti
 
 	var y = d3.scale.linear() //set up scale
 		.domain(d3.extent(extent))
-		.range([height, topPadding-15]);
+		.range([height, topPadding]);
 
 	var yAxis = d3.svg.axis() //set up y-axis
 		.scale(y)
@@ -182,7 +191,14 @@ function targetGraph(input, sort, zoom, exclude) { //graph of targets & predicti
 		.ticks(5);
 
 	chart.append("g")
-		.call(yAxis);
+		.attr("transform", "translate(" + leftPadding + ",0)")
+		.call(yAxis)
+		.selectAll("path")
+		.style("stroke-width", "1px")
+		.style("stroke","black")
+		.style("fill","none")
+		.selectAll("line")
+		.style("stroke","black");
 
 	chart.append("text") //set up title
 		.attr("x", width/2)
@@ -198,7 +214,7 @@ function targetGraph(input, sort, zoom, exclude) { //graph of targets & predicti
 		.enter()
 		.append("rect")
 		.attr("x", function (d, i) {
-			return i * barWidth;
+			return i * barWidth + leftPadding;
 		})
 		.attr("width", function () {
 			return barWidth-1;
@@ -211,10 +227,9 @@ function targetGraph(input, sort, zoom, exclude) { //graph of targets & predicti
 		})
 		.style("fill", "gray");
 
-
 	var line = d3.svg.line() // predictions in line
 		.x(function (d, i) {
-			return barWidth/2 + barWidth * i;
+			return barWidth/2 + barWidth * i + leftPadding;
 		})
 		.y(function (d) {
 			return y(d[1]);
@@ -231,7 +246,7 @@ function targetGraph(input, sort, zoom, exclude) { //graph of targets & predicti
 		.style("visibility", "hidden");
 
 	d3.select("#targetGraphWrapper").on("mouseover", function() { //display tooltip upon mouseover
-		var index = Math.floor(event.pageX / barWidth);
+		var index = Math.floor((event.pageX - leftPadding) / barWidth);
 
 		tooltip.style("visibility", "visible");
 
@@ -244,7 +259,7 @@ function targetGraph(input, sort, zoom, exclude) { //graph of targets & predicti
 		var scrollX = $("#graphWindow").scrollLeft();
 
 		var cornerX = event.pageX + scrollX;
-		var cornerY = event.pageY;
+		var cornerY = topPadding;
 
 		var width = 0;
 
@@ -296,15 +311,28 @@ function targetGraph(input, sort, zoom, exclude) { //graph of targets & predicti
 
 }
 
-function featureGraph(input, featureIndex, sort, zoom, filter) { //exclude lists indexes of things that are filtered out	
-	arrays = [input.cellline, input.features[featureIndex].values]; //the only ones we care about. 
+function featureGraph(input, featureIndex, sort, zoom, include) { //include lists indexes of things that are filtered out	
+	//arrays = [input.cellline, input.features[featureIndex].values]; //the only ones we care about. 
 	//featureName = input.features[featureIndex].name;
 	//console.log(arrays[1].length + " " + featureName);
+
+	arrays = [[],[]]; //array of two arrays, cellline, VALUE 
+	for (var i = 0; i < include.length; i++) {
+		arrays[0].push(input.cellline[include[i]]);
+		arrays[1].push(input.features[featureIndex].values[include[i]]);
+	}
+
 	//graph size
 	var zoom = Math.max(2, Math.min(zoom, 20));
-	var width = input.cellline.length * zoom;
+
+	zoom = zoom * Math.min(10, Math.floor(430/include.length)); 
+
+	var width = arrays[0].length * zoom;
 	var height = 200;
 	var topPadding = 40;
+	var leftPadding = 30;
+
+
 
 	//merge two arrays into one
 	var data = []; //empty matrix. 0 = lineages, 1 = predictions, 2 = targets
@@ -338,14 +366,14 @@ function featureGraph(input, featureIndex, sort, zoom, filter) { //exclude lists
 		.append("div")
 		.attr("id","f" + featureIndex+ "Wrapper")
 		.append("svg")
-		.attr("width", width + 200)
+		.attr("width", width + 300)
 		.attr("height", height);
 
 	var chart = d3.select("#f" + featureIndex + " svg");
 
 	var y = d3.scale.linear() //set up scale
 		.domain(d3.extent(arrays[1]))
-		.range([height, topPadding-15]);
+		.range([height, topPadding]);
 
 	var yAxis = d3.svg.axis() //set up y-axis
 		.scale(y)
@@ -353,7 +381,12 @@ function featureGraph(input, featureIndex, sort, zoom, filter) { //exclude lists
 		.ticks(5);
 
 	chart.append("g")
-		.call(yAxis);
+		.attr("transform", "translate(" + leftPadding + ",0)")
+		.call(yAxis)
+		.selectAll("path")
+		.style("stroke-width", "1px")
+		.style("stroke","black")
+		.style("fill","none");
 
 	chart.append("text") //set up title
 		.attr("x", width/2)
@@ -369,7 +402,7 @@ function featureGraph(input, featureIndex, sort, zoom, filter) { //exclude lists
 		.enter()
 		.append("rect")
 		.attr("x", function (d, i) {
-			return i * barWidth;
+			return i * barWidth + leftPadding;
 		})
 		.attr("width", function () {
 			return barWidth-1;
@@ -393,7 +426,7 @@ function featureGraph(input, featureIndex, sort, zoom, filter) { //exclude lists
 
 	chart.on("mouseover", function() { //display tooltip upon mouseover
 		//console.log(featureIndex);
-		var index = Math.floor(event.pageX / barWidth);
+		var index = Math.floor((event.pageX - leftPadding) / barWidth);
 
 		//console.log(featureIndex);
 		//	console.log(tooltip);
@@ -408,7 +441,7 @@ function featureGraph(input, featureIndex, sort, zoom, filter) { //exclude lists
 		var scrollY = $(document).scrollTop();
 
 		var cornerX = event.pageX + scrollX;
-		var cornerY = (event.pageY + scrollY) % 200;
+		var cornerY = topPadding;
 
 		var width = 0;	
 
@@ -453,4 +486,21 @@ function featureGraph(input, featureIndex, sort, zoom, filter) { //exclude lists
 			});
 	});
 
+}
+
+function featureScatter(input, featureIndex, filter) { //scatterplot of predictions (x) vs. feature values (y)
+	include = [];
+	for (var i = 0; i < input.cellline.length; i++) {
+		// console.log(data.cellline[i] + " " + data.cellline[i].indexOf(filter));
+		if (input.cellline[i].indexOf(filter) !== -1) {
+			include.push(i);			
+		}
+	}
+
+	arrays = [[],[]]; //array of two arrays, cellline, VALUE 
+	for (var i = 0; i < include.length; i++) {
+		arrays[0].push(input.predictions[include[i]]);
+		arrays[1].push(input.features[featureIndex].values[include[i]]);
+		console.log(arrays[0][i] + " " + arrays[1][i]);
+	}
 }
