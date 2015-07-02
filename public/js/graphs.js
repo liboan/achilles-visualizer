@@ -131,8 +131,8 @@ function targetGraph(input, sort, zoom, include) { //graph of targets & predicti
 	//arrays = [input.cellline, input.predictions, input.target]; //the only ones we care about. 
 
 	//graph size
-	var zoom = Math.max(2, Math.min(zoom, 20));
-	zoom = zoom * Math.min(10, Math.floor(430/include.length)); 
+	var zoom = Math.max(2, Math.min(zoom * Math.floor(430/include.length), 20));
+	//zoom = zoom * Math.min(10, Math.floor(430/include.length)); 
 
 	var width = arrays[0].length * zoom;
 	var height = 200;
