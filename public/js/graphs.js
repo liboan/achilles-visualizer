@@ -36,12 +36,17 @@ function setup() {
 		d3.select("body")
 			.append("div")
 			.attr("id", "UI")
+			.style("left", "0px")
+			.style("top", "0px")
+			.style("padding","10px")
+			.style("width", "100%")
 			.style("background-color", "white")
 			.style("z-index", 2)
 			.style("position","fixed");
 
-		d3.select("#UI")
-			.append("input")
+		var ui = d3.select("#UI");
+
+		ui.append("input")
 			.attr("type", "button")
 			.attr("value", "Zoom in")
 			.on("click", function () {
@@ -49,8 +54,7 @@ function setup() {
 				loadGraphs(data,sort,zoom,filterOptions[selectMenu.property("selectedIndex")]);
 			});
 
-		d3.select("#UI")
-			.append("input")
+		ui.append("input")
 			.attr("type", "button")
 			.attr("value", "Zoom out")
 			.on("click", function () {
@@ -58,8 +62,11 @@ function setup() {
 				loadGraphs(data,sort,zoom,filterOptions[selectMenu.property("selectedIndex")]);
 			});
 
-		var selectMenu = d3.select("#UI")
-			.append("select")
+		ui.append("span")
+			.style("font-family", "Arial")
+			.text("  Filter by cell lineage: ")
+
+		var selectMenu = ui.append("select")
 			.attr("id", "filter")
 			.attr("value","NONE")
 			.on("change", function () {
@@ -99,14 +106,14 @@ function loadGraphs(data, sort, zoom, filter) {
 	d3.select("body") //add area for cell line graphs
 		.append("div")
 		.attr("id", "graphWindow")
-		.attr("overflow-x", "auto");
 
 	
 	targetGraph(data, sort, zoom, include);
 	for (var i = 0; i < 30; i++) {
+		//data.features[i].values = zScore(data.features[i].values);
 		featureGraph(data, i, sort, zoom, include);
 	}
-
+	mutationHist(data, 14, include);
 }
 
 function targetGraph(input, sort, zoom, include) { //graph of targets & predictions. sort controls what index to sort by, zoom controls width of graph
@@ -124,11 +131,11 @@ function targetGraph(input, sort, zoom, include) { //graph of targets & predicti
 	var zoom = Math.max(2, Math.min(zoom, 20));
 
 	zoom = zoom * Math.min(10, Math.floor(430/include.length));  //increase zoom effect if fewer elements are displayed
-	
+
 	var width = arrays[0].length * zoom;
 	var height = 200;
 	var topPadding = 40;
-	var leftPadding = 30;
+	var leftPadding = 50;
 
 	//merge three arrays into one
 	var data = []; //empty matrix. 0 = lineages, 1 = predictions, 2 = targets
@@ -162,7 +169,7 @@ function targetGraph(input, sort, zoom, include) { //graph of targets & predicti
 		.style("border-bottom", "2px solid black")
 		.style("padding-top", "40px")
 		.style("z-index",1)
-		.style("position", "fixed")
+		//.style("position", "fixed") //broken at the moment, targetGraph can't scroll 
 		.style("background-color", "white")
 		.append("div")
 		.attr("id", "targetGraphWrapper")
@@ -171,10 +178,10 @@ function targetGraph(input, sort, zoom, include) { //graph of targets & predicti
 		.attr("width", width + 300)
 		.attr("height", height);
 
-	d3.select("#graphWindow")
-		.append("div")
-		.attr("id", "underneath")
-		.style("height", ($("#UI").height() + $("#targetGraph").height() + 40) + "px")
+	// d3.select("#graphWindow") //broken at the moment, targetGraph can't scroll 
+	// 	.append("div")
+	// 	.attr("id", "underneath")
+	// 	.style("height", ($("#UI").height() + $("#targetGraph").height() + 40) + "px")
 
 	var chart = d3.select("#targetGraph svg");
 
@@ -182,7 +189,7 @@ function targetGraph(input, sort, zoom, include) { //graph of targets & predicti
 				  Math.max(d3.extent(arrays[1])[1], d3.extent(arrays[2])[1])]; //find the minimum and maximum in combined targets & predictions
 
 	var y = d3.scale.linear() //set up scale
-		.domain(d3.extent(extent))
+		.domain(extent)
 		.range([height, topPadding]);
 
 	var yAxis = d3.svg.axis() //set up y-axis
@@ -330,7 +337,7 @@ function featureGraph(input, featureIndex, sort, zoom, include) { //include list
 	var width = arrays[0].length * zoom;
 	var height = 200;
 	var topPadding = 40;
-	var leftPadding = 30;
+	var leftPadding = 50;
 
 
 
@@ -379,8 +386,10 @@ function featureGraph(input, featureIndex, sort, zoom, include) { //include list
 
 	var chart = d3.select("#f" + featureIndex + " svg");
 
+	var extent = d3.extent(arrays[1]);
+
 	var y = d3.scale.linear() //set up scale
-		.domain(d3.extent(arrays[1]))
+		.domain(extent)
 		.range([height, topPadding]);
 
 	var yAxis = d3.svg.axis() //set up y-axis
@@ -505,10 +514,11 @@ function featureGraph(input, featureIndex, sort, zoom, include) { //include list
 function featureScatter(input, featureIndex, include) { //scatterplot of feature values (x) vs. predictions (y)
 	featureName = input.features[featureIndex].name;
 
-	arrays = [[],[]]; //array of two arrays, feature values, predictions
+	arrays = [[],[], []]; //array of two arrays, feature values, predictions, targets
 	for (var i = 0; i < include.length; i++) {
 		arrays[0].push(input.features[featureIndex].values[include[i]]);
 		arrays[1].push(input.predictions[include[i]]);
+		arrays[2].push(input.target[include[i]]);
 	}
 
 	//merge two arrays into one
@@ -588,14 +598,31 @@ function featureScatter(input, featureIndex, include) { //scatterplot of feature
 		.data(data)
 		.enter()
 		.append("circle")
-		.attr("r", 3)
+		.attr("r", 2)
 		.attr("cx", function (d) {
 			return x(d[0]);
 		})
 		.attr("cy", function (d) {
 			return y(d[1]);
 		})
-		.style("fill", "red");
+		.style("fill", "none")
+		.style("stroke", "red");
+}
 
+function mutationHist(input, featureIndex, include) { //box & whisker histogram of present mutations
+	data = []; //empty matrix. 0 = cellline, 1 = mutation value, 2 = prediction value, 3 = mutation locations (to be filled later)
+	for (var i = 0; i < include.length; i++) { 
+		data.push([input.cellline[include[i]], input.features[featureIndex].values[include[i]], input.predictions[include[i]], []]);
+		for (var j = 0; j < input.mutations.length; j++) {
+			//console.log(data[i][0] + " " + input.mutations[j].cellline);
+			if (data[i][0] === input.mutations[j].cellline) { //check to see if cell line has a mutation, and if so, add location
+				//console.log(j + " " + input.mutations[j].mutations);
+				data[i][3] = data[i][3].concat(input.mutations[j].mutations);
+				//console.log(data[i][3]);
+			}
+		};
+		//console.log(data[i]);
 
+	};
+	console.log(data);
 }
