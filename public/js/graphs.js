@@ -15,6 +15,11 @@ function setup() {
 	sort = 0;
 	zoom = 2;
 	$.getJSON("/json", function (data) {
+		//cut down data to top few features
+		var slice = Math.min(30, data.cellline.length);
+		data.features = data.features.slice(0, slice);
+
+
 		//get filtering options
 		filterOptions = [""];
 		for (var i = 0; i < data.cellline.length; i++) {
@@ -31,6 +36,8 @@ function setup() {
 		d3.select("body")
 			.append("div")
 			.attr("id", "UI")
+			.style("background-color", "white")
+			.style("z-index", 2)
 			.style("position","fixed");
 
 		d3.select("#UI")
@@ -68,26 +75,6 @@ function setup() {
 				return d;
 			});
 
-		var featureMenu = d3.select("#UI")
-			.append("select")
-			.attr("id", "features")
-			.attr("Value", "NONE")
-			.on("change", function () {
-				console.log(featureMenu.property("selectedIndex"));
-				console.log(data.features[featureMenu.property("selectedIndex")]);
-				//featureScatter(data, featureMenu.property("selectedIndex"), filterOptions[selectMenu.property("selectedIndex")])
-			});
-
-		d3.select("#features")
-			.selectAll("option")
-			.data(data.features)
-			.enter()
-			.append("option")
-			.text(function (d) {
-				return d.name;
-			});
-
-
 
 		loadGraphs(data, 0, zoom, "");
 		a = data;
@@ -109,15 +96,17 @@ function loadGraphs(data, sort, zoom, filter) {
 
 	d3.select("#graphWindow").remove();
 
-	d3.select("body")
+	d3.select("body") //add area for cell line graphs
 		.append("div")
 		.attr("id", "graphWindow")
 		.attr("overflow-x", "auto");
+
 	
 	targetGraph(data, sort, zoom, include);
 	for (var i = 0; i < 30; i++) {
 		featureGraph(data, i, sort, zoom, include);
 	}
+
 }
 
 function targetGraph(input, sort, zoom, include) { //graph of targets & predictions. sort controls what index to sort by, zoom controls width of graph
@@ -130,10 +119,12 @@ function targetGraph(input, sort, zoom, include) { //graph of targets & predicti
 	}
 	//arrays = [input.cellline, input.predictions, input.target]; //the only ones we care about. 
 
+	
 	//graph size
-	var zoom = Math.max(2, Math.min(zoom * Math.floor(430/include.length), 20));
-	//zoom = zoom * Math.min(10, Math.floor(430/include.length)); 
+	var zoom = Math.max(2, Math.min(zoom, 20));
 
+	zoom = zoom * Math.min(10, Math.floor(430/include.length));  //increase zoom effect if fewer elements are displayed
+	
 	var width = arrays[0].length * zoom;
 	var height = 200;
 	var topPadding = 40;
@@ -168,13 +159,22 @@ function targetGraph(input, sort, zoom, include) { //graph of targets & predicti
 	d3.select("#graphWindow") //add graph body
 		.append("div")
 		.attr("id","targetGraph")
+		.style("border-bottom", "2px solid black")
 		.style("padding-top", "40px")
+		.style("z-index",1)
+		.style("position", "fixed")
+		.style("background-color", "white")
 		.append("div")
 		.attr("id", "targetGraphWrapper")
 		.append("svg")
 		.style("pointer-events", "all")
 		.attr("width", width + 300)
 		.attr("height", height);
+
+	d3.select("#graphWindow")
+		.append("div")
+		.attr("id", "underneath")
+		.style("height", ($("#UI").height() + $("#targetGraph").height() + 40) + "px")
 
 	var chart = d3.select("#targetGraph svg");
 
@@ -245,7 +245,7 @@ function targetGraph(input, sort, zoom, include) { //graph of targets & predicti
 		.attr("class", "tooltip")
 		.style("visibility", "hidden");
 
-	d3.select("#targetGraphWrapper").on("mouseover", function() { //display tooltip upon mouseover
+	d3.select("#targetGraph").on("mouseover", function() { //display tooltip upon mouseover
 		var index = Math.floor((event.pageX - leftPadding) / barWidth);
 
 		tooltip.style("visibility", "visible");
@@ -313,7 +313,7 @@ function targetGraph(input, sort, zoom, include) { //graph of targets & predicti
 
 function featureGraph(input, featureIndex, sort, zoom, include) { //include lists indexes of things that are filtered out	
 	//arrays = [input.cellline, input.features[featureIndex].values]; //the only ones we care about. 
-	//featureName = input.features[featureIndex].name;
+	featureName = input.features[featureIndex].name;
 	//console.log(arrays[1].length + " " + featureName);
 
 	arrays = [[],[]]; //array of two arrays, cellline, VALUE 
@@ -325,7 +325,7 @@ function featureGraph(input, featureIndex, sort, zoom, include) { //include list
 	//graph size
 	var zoom = Math.max(2, Math.min(zoom, 20));
 
-	zoom = zoom * Math.min(10, Math.floor(430/include.length)); 
+	zoom = zoom * Math.min(10, Math.floor(430/include.length));  //increase zoom effect if fewer elements are displayed
 
 	var width = arrays[0].length * zoom;
 	var height = 200;
@@ -362,12 +362,20 @@ function featureGraph(input, featureIndex, sort, zoom, include) { //include list
 
 	d3.select("#graphWindow") //add graph body
 		.append("div")
-		.attr("id","f" + featureIndex.toString())
+		.attr("id","f" + featureIndex)
 		.append("div")
-		.attr("id","f" + featureIndex+ "Wrapper")
+		.attr("id","f" + featureIndex + "Wrapper")
 		.append("svg")
 		.attr("width", width + 300)
 		.attr("height", height);
+
+	d3.select("#f" + featureIndex)
+		.append("input")
+		.attr("type","button")
+		.attr("value","Show/hide scatter plot or mutation plot")
+		.on("click", function () {
+			$("#f" + featureIndex + "scatter").toggle();
+		});
 
 	var chart = d3.select("#f" + featureIndex + " svg");
 
@@ -486,21 +494,108 @@ function featureGraph(input, featureIndex, sort, zoom, include) { //include list
 			});
 	});
 
+	if (/^.MUT/.exec(featureName)) { //check if feature is a mutation
+
+	}
+	else {	
+		featureScatter(input, featureIndex, include); //finally, call the scatter
+	}
 }
 
-function featureScatter(input, featureIndex, filter) { //scatterplot of predictions (x) vs. feature values (y)
-	include = [];
-	for (var i = 0; i < input.cellline.length; i++) {
-		// console.log(data.cellline[i] + " " + data.cellline[i].indexOf(filter));
-		if (input.cellline[i].indexOf(filter) !== -1) {
-			include.push(i);			
-		}
+function featureScatter(input, featureIndex, include) { //scatterplot of feature values (x) vs. predictions (y)
+	featureName = input.features[featureIndex].name;
+
+	arrays = [[],[]]; //array of two arrays, feature values, predictions
+	for (var i = 0; i < include.length; i++) {
+		arrays[0].push(input.features[featureIndex].values[include[i]]);
+		arrays[1].push(input.predictions[include[i]]);
 	}
 
-	arrays = [[],[]]; //array of two arrays, cellline, VALUE 
-	for (var i = 0; i < include.length; i++) {
-		arrays[0].push(input.predictions[include[i]]);
-		arrays[1].push(input.features[featureIndex].values[include[i]]);
-		console.log(arrays[0][i] + " " + arrays[1][i]);
-	}
+	//merge two arrays into one
+	var data = []; //empty matrix. 0 = feature values, 1 = predictions
+	for (var i = 0; i < arrays[0].length; i++) {
+		data.push([arrays[0][i],arrays[1][i]]); 
+	};
+
+	var width = 500;
+	var height = 500;
+
+	var leftPadding = 50;
+	var topPadding = 50;
+
+	d3.select("#f" + featureIndex + "scatter").remove();
+
+	d3.select("#f" + featureIndex)
+		.append("div")
+		.style("display","none")
+		.attr("id", "f" + featureIndex + "scatter")
+		.append("svg") //add graph window
+		.attr("width", width)
+		.attr("height", height);
+
+	var scatter = d3.select("#f" + featureIndex + "scatter svg");
+
+	var x = d3.scale.linear()
+		.domain(d3.extent(arrays[0]))
+		.range([leftPadding, width - leftPadding]);
+
+	var xAxis = d3.svg.axis() //set up x-axis
+		.scale(x)
+		.orient("bottom")
+		.ticks(5);
+
+	scatter.append("g") //add x-axis
+		.attr("transform", "translate(0," + (height - topPadding) + ")")
+		.call(xAxis)
+		.selectAll("path")
+		.style("stroke-width", "1px")
+		.style("stroke","black")
+		.style("fill","none");
+
+	var y = d3.scale.linear() //set up Y scale
+		.domain(d3.extent(arrays[1]))
+		.range([height - topPadding, topPadding]);
+
+	var yAxis = d3.svg.axis() //set up y-axis
+		.scale(y)
+		.orient("left")
+		.ticks(5);
+
+	scatter.append("g") //add y-axis
+		.attr("transform", "translate(" + leftPadding + ",0)")
+		.call(yAxis)
+		.selectAll("path")
+		.style("stroke-width", "1px")
+		.style("stroke","black")
+		.style("fill","none");
+
+	scatter.append("text") //x-axis label
+		.attr("x", width/2)
+		.attr("y", height - topPadding + 40)
+		.style("font-family", "Arial")
+		.attr("text-anchor", "middle")
+		.text(featureName);
+
+	scatter.append("text") //y-axis label
+		.attr("x", leftPadding - 30)
+		.attr("y", height/2)
+		.style("font-family", "Arial")
+		.attr("transform", "rotate(270 " + (leftPadding - 30) + "," + (height/2) + ")")
+		.attr("text-anchor", "middle")
+		.text("Predictions");
+
+	scatter.selectAll("circle")
+		.data(data)
+		.enter()
+		.append("circle")
+		.attr("r", 3)
+		.attr("cx", function (d) {
+			return x(d[0]);
+		})
+		.attr("cy", function (d) {
+			return y(d[1]);
+		})
+		.style("fill", "red");
+
+
 }
