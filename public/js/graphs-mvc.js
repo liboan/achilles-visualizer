@@ -142,7 +142,9 @@ function setup(data) {
         targetWindow.append("div")
             .style("width",leftWidth + "px")
             .style("display","inline-block")
-            .attr("class", "left")
+            .style("margin-bottom", "10px")
+            .style("font-family", "Arial")
+            //.attr("class", "left")
             .attr("id", "targetLeft")
             .append("div")
             .attr("class", "title")
@@ -178,6 +180,7 @@ function setup(data) {
         var lefts = featureWindows.append("div")
             .style("width",leftWidth + "px")
             .style("display","inline-block")
+            .style("margin-bottom", "10px")            
             .text(function (d) {
                 return d.name;
             })
@@ -185,6 +188,24 @@ function setup(data) {
             .attr("id", function (d, i) {
                 return "f" + i + "Left";
             });
+
+        lefts.append("br");
+
+        lefts.append("div") //importance
+            .text(function (d) {
+                return d.importance;
+            })
+            .style("padding-top", "10px")
+            .style("padding-bottom", "10px")
+            .style("margin", "8px")
+            .style("width", function (d) {
+                console.log(leftWidth * d.importance);
+                return Math.floor(leftWidth * d.importance) + "px";
+            })
+            .style("background-color", "red")
+            .style("display", "inline-block");
+
+        lefts.append("br");
 
         var graphs = featureWindows.append("svg")
             .style("vertical-align", "top")
@@ -279,7 +300,7 @@ function setup(data) {
                     return i * barWidth + graphLeftPadding;
                 })
                 .attr("width", function (d, i) {
-                    return barWidth - 1;
+                    return barWidth;
                 })
                 .attr("y", function (d) {
                     return y(Math.max(0, data.target[d]));
@@ -309,11 +330,12 @@ function setup(data) {
                 .data(indices) //bind indices and use them to access pertinent values from data object
                 .enter()
                 .append("rect")
+                .attr("fill", "lightgray")
                 .attr("x", function (d, i) {
                     return i * barWidth + graphLeftPadding;
                 })
                 .attr("width", function (d, i) {
-                    return barWidth - 1;
+                    return barWidth;
                 })
                 .attr("y", function (d) {
                     return y(Math.max(0, data.features[id].values[d]));
@@ -334,7 +356,8 @@ function setup(data) {
                 }
     
             }
-        }
+    }
+
     function updateScatter(id, type) {  //fill in scatter of feature value (x) vs. prediction & target (y)
                                         //id = int, index of feature. type = string, "p" = prediction, "t" = target    
         var xMin = Infinity, xMax = -Infinity; //find extent of data
