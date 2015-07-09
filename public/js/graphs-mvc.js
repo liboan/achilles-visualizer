@@ -101,7 +101,7 @@ function setup(data) {
 
 
     var graphHeight = 80;
-    var leftWidth = 200;
+    var leftWidth = 300;
     var graphLeftPadding = 30;
     var scatterHeight = 500;
     var scatterWidth = 500;
@@ -139,10 +139,30 @@ function setup(data) {
             .insert("div","div")
             .attr("id", "target");
 
-        var graph = targetWindow.append("div")
-            .append("svg")
-            .attr("class", "graph")
+        targetWindow.append("div")
+            .style("width",leftWidth + "px")
+            .style("display","inline-block")
+            .attr("class", "left")
+            .attr("id", "targetLeft")
+            .append("div")
+            .attr("class", "title")
+            .style("margin-bottom", "2px")
+            .text("GS_SMARCA2");
+
+        d3.select("#targetLeft").selectAll("div .summary")
+            .data(data.report_summary)
+            .enter()
+            .append("div")
+            .attr("class", "summary")
+            .text(function (d) {
+                return d;
+            });
+
+        targetWindow.append("svg")
+            .style("vertical-align", "top")
             .attr("id", "targetGraph")
+            .attr("height", graphHeight);
+
     }
 
     function initFeatureWindows () { //reads data and adds in feature windows accordingly
@@ -156,30 +176,42 @@ function setup(data) {
             });
 
         var lefts = featureWindows.append("div")
+            .style("width",leftWidth + "px")
+            .style("display","inline-block")
             .text(function (d) {
                 return d.name;
             })
+            .attr("class", "left")
             .attr("id", function (d, i) {
-                return "f" + i + "left";
+                return "f" + i + "Left";
             });
 
-        var graphs = featureWindows.append("div")
-            .append("svg")
-            .attr("class", "graph")
+        var graphs = featureWindows.append("svg")
+            .style("vertical-align", "top")
             .attr("id", function (d, i) {
                 return "f" + i + "Graph";
             })
             .attr("width", 400)
             .attr("height", graphHeight);
 
-        var scatters = featureWindows.append("div")
+        var predictionScatters = featureWindows.append("div")
+            .attr("class", "details")
             .append("svg")
-            .attr("class", "scatter")
+            .attr("class", "predictionScatter")
             .attr("id", function (d, i) {
-                return "f" + i + "Scatter";
+                return "f" + i + "pScatter";
             })
-            .attr("width", 500)
-            .attr("height", 500);
+            .attr("width", scatterHeight)
+            .attr("height", scatterWidth);
+
+        var targetScatters = d3.selectAll(".details")
+            .append("svg")
+            .attr("class", "targetScatter")
+            .attr("id", function (d, i) {
+                return "f" + i + "tScatter";
+            })
+            .attr("width", scatterHeight)
+            .attr("height", scatterWidth);
 
     }
 
@@ -204,10 +236,20 @@ function setup(data) {
 
         graph.selectAll("*").remove(); //clear previous contents
 
-        var barWidth = Math.pow(zoom + 1, 2)
+        var barWidth = Math.pow(zoom, 2) + 1;
         var graphWidth = barWidth * indices.length + graphLeftPadding; //zoom = width of bars in pixels
 
         graph.attr("width", graphWidth);
+
+        var wrapWindow; //div that wraps all of the pertinent visuals, must be expanded 
+        if (typeof id === "number") {
+            wrapWindow = d3.select("#f" + id);
+        }
+        else {
+            wrapWindow = d3.select("#target");
+        }
+
+        wrapWindow.style("width", (graphWidth + 500) + "px" );
 
         var y = d3.scale.linear() //set up scale
             .domain([min,max])
@@ -257,7 +299,7 @@ function setup(data) {
 
             graph.append("path")
                 .attr("d", line(indices))
-                .attr("stroke","green")
+                .attr("stroke","darkgreen")
                 .attr("stroke-width",2)
                 .attr("fill", "none");                
 
@@ -283,26 +325,42 @@ function setup(data) {
 
         if (typeof id === "number") {    
             if (/^.MUT/.exec(data.features[id].name)) { //if it's a mutation, draw box plot instead
-                    updateBoxPlot(id);
+                    updateBoxPlot(id, "p");
+                    updateBoxPlot(id, "t");
                 }
                 else {
-                    updateScatter(id);
+                    updateScatter(id, "p");
+                    updateScatter(id, "t");
                 }
     
             }
         }
-    function updateScatter(id) { //fill in scatter of feature value (x) vs. prediction & target (y)
+    function updateScatter(id, type) {  //fill in scatter of feature value (x) vs. prediction & target (y)
+                                        //id = int, index of feature. type = string, "p" = prediction, "t" = target    
         var xMin = Infinity, xMax = -Infinity; //find extent of data
         var yMin = Infinity, yMax = -Infinity;
+
+        var output; //depending on type, either data.predictions or data.target. Makes stuff simpler.
 
         for (var i = 0; i < indices.length; i++) {
             xMin = Math.min(xMin, data.features[id].values[indices[i]]);
             xMax = Math.max(xMax, data.features[id].values[indices[i]]);
             yMin = Math.min(yMin, data.predictions[indices[i]], data.target[indices[i]]);
-            yMax = Math.max(yMax, data.predictions[i], data.target[indices[i]]);
+            yMax = Math.max(yMax, data.predictions[indices[i]], data.target[indices[i]]);
         };
 
-        var scatter = d3.select("#f" + id + "Scatter");
+        switch (type) {
+            case "p":
+                output = data.predictions;
+                break;
+            case "t":
+                output = data.target;
+                break;
+            default:
+                output = data.predictions;
+        }
+
+        var scatter = d3.select("#f" + id + type + "Scatter");
 
         scatter.selectAll("*").remove(); //clean up graph
 
@@ -340,51 +398,54 @@ function setup(data) {
             .style("stroke","black")
             .style("fill","none");
 
-        scatter.selectAll("circle .target")
+        scatter.selectAll("circle")
             .data(indices)
             .enter()
             .append("circle")
-            .attr("class","target")
             .attr("r", 3)
             .attr("cx", function (d) {
                 return x(data.features[id].values[d]);
             })
             .attr("cy", function (d) {
-                return y(data.target[d]);
+                return y(output[d]);
             })
-            .style("fill", "red")
-            .style("stroke", "red");
-
-        scatter.selectAll("circle .predictions")
-            .data(indices)
-            .enter()
-            .append("circle")
-            .attr("class", "predictions")
-            .attr("r", 3)
-            .attr("cx", function (d) {
-                return x(data.features[id].values[d]);
-            })
-            .attr("cy", function (d) {
-                return y(data.predictions[d]);
-            })
-            .style("fill", "none")
-            .style("stroke", "green")
-            .style("stroke-width", "2px");
+            .style("fill", function () {
+                switch (type) {
+                    case "p": 
+                        return "darkgreen";
+                    case "t":
+                        return "red";
+                }
+            });
     }
 
-    function updateBoxPlot(id) { //groups the celllines by presence of mutation, and plots their target value
+    function updateBoxPlot(id, type) {  //groups the celllines by presence of mutation, and plots their target value
+                                        //id = int, index of feature. type = string, "p" = prediction, "t" = target        
         var yMin = Infinity, yMax = -Infinity; //find extent of data
 
         var buckets = [[], [], []]; //buckets[0] is for mutation values of 0, [1] for 1, [2] for 2
 
+        var output; //depending on type, either data.predictions or data.target. Makes stuff simpler.
+
+        switch (type) {
+            case "p":
+                output = data.predictions;
+                break;
+            case "t":
+                output = data.target;
+                break;
+            default:
+                output = data.predictions;
+        }        
+
         for (var i = 0; i < indices.length; i++) { //while doing so, sort data into three bins
-            yMin = Math.min(yMin, data.target[indices[i]]);
-            yMax = Math.max(yMax, data.target[indices[i]]);
+            yMin = Math.min(yMin, data.predictions[indices[i]], data.target[indices[i]]);
+            yMax = Math.max(yMax, data.predictions[indices[i]], data.target[indices[i]]);
 
             //console.log(data.features[id].values[indices[i]]);
 
             if (data.features[id].values[indices[i]] !== null) {
-                buckets[data.features[id].values[indices[i]]].push(data.predictions[indices[i]]);
+                buckets[data.features[id].values[indices[i]]].push(output[indices[i]]);
             }
         };
         //console.log([yMin,yMax]);
@@ -395,7 +456,7 @@ function setup(data) {
 
         console.log(buckets);
 
-        var plot = d3.select("#f" + id + "Scatter");
+        var plot = d3.select("#f" + id + type + "Scatter");
 
         plot.selectAll("*").remove();
 
@@ -466,7 +527,14 @@ function setup(data) {
             .attr("y2", function (d) {
                 return y(d3.max(d));
             })
-            .style("stroke", "black")
+            .style("stroke", function () {
+                switch (type) {
+                    case "p": 
+                        return "darkgreen";
+                    case "t":
+                        return "red";
+                }
+            })
             .style("stroke-width", "2px");
 
         boxes.append("line") //min line
@@ -482,7 +550,14 @@ function setup(data) {
             .attr("y2", function (d) {
                 return y(d3.min(d));
             })
-            .style("stroke", "black")
+            .style("stroke", function () {
+                switch (type) {
+                    case "p": 
+                        return "darkgreen";
+                    case "t":
+                        return "red";
+                }
+            })            
             .style("stroke-width", "2px");   
 
         boxes.append("line") //median line
@@ -498,7 +573,14 @@ function setup(data) {
             .attr("y2", function (d) {
                 return y(d3.median(d));
             })
-            .style("stroke", "black")
+            .style("stroke", function () {
+                switch (type) {
+                    case "p": 
+                        return "darkgreen";
+                    case "t":
+                        return "red";
+                }
+            })
             .style("stroke-width", "2px");
 
         boxes.append("line") //top whisker             
@@ -514,7 +596,14 @@ function setup(data) {
             .attr("y2", function (d) {
                 return y(d3.quantile(d, 0.75));
             })
-            .style("stroke", "black")
+            .style("stroke", function () {
+                switch (type) {
+                    case "p": 
+                        return "darkgreen";
+                    case "t":
+                        return "red";
+                }
+            })
             .style("stroke-width", "1px");
 
         boxes.append("line") //bottom whisker             
@@ -530,7 +619,14 @@ function setup(data) {
             .attr("y2", function (d) {
                 return y(d3.quantile(d, 0.25));
             })
-            .style("stroke", "black")
+            .style("stroke", function () {
+                switch (type) {
+                    case "p": 
+                        return "darkgreen";
+                    case "t":
+                        return "red";
+                }
+            })
             .style("stroke-width", "1px");
 
         // console.log(boxes);
