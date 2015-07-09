@@ -504,7 +504,7 @@ function featureGraph(input, featureIndex, sort, zoom, include) { //include list
 	});
 
 	if (/^.MUT/.exec(featureName)) { //check if feature is a mutation
-
+		mutationHist(input, featureIndex, include);
 	}
 	else {	
 		featureScatter(input, featureIndex, include); //finally, call the scatter
@@ -610,7 +610,7 @@ function featureScatter(input, featureIndex, include) { //scatterplot of feature
 }
 
 function mutationHist(input, featureIndex, include) { //box & whisker histogram of present mutations
-	data = []; //empty matrix. 0 = cellline, 1 = mutation value, 2 = prediction value, 3 = mutation locations (to be filled later)
+	var data = []; //empty matrix. 0 = cellline, 1 = mutation value, 2 = prediction value, 3 = mutation locations (to be filled later)
 	for (var i = 0; i < include.length; i++) { 
 		data.push([input.cellline[include[i]], input.features[featureIndex].values[include[i]], input.predictions[include[i]], []]);
 		for (var j = 0; j < input.mutations.length; j++) {
@@ -625,4 +625,33 @@ function mutationHist(input, featureIndex, include) { //box & whisker histogram 
 
 	};
 	console.log(data);
+
+	var buckets = [[],[],[]]; //prediction values fall into either 0, 1, or 2, depending on cell line mutation
+
+	for (var i = 0; i < data.length; i++) {
+		buckets[data[i][1]].push(data[i][2]);
+	};
+
+	console.log(buckets);
+
+	var width = 500;
+	var height = 500;
+
+	var leftPadding = 50;
+	var topPadding = 50;
+
+	d3.select("#f" + featureIndex + "scatter").remove(); //clear div and set up
+
+	d3.select("#f" + featureIndex)
+		.append("div")
+		.style("display","none")
+		.attr("id", "f" + featureIndex + "scatter")
+		.append("svg") //add graph window
+		.attr("width", width)
+		.attr("height", height);
+
+	var scatter = d3.select("#f" + featureIndex + "scatter svg");
+
+
+
 }

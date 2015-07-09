@@ -11,7 +11,12 @@ app.get('/', function (req, res) {
 });
 
 app.get("/json", function (req, res) {
-	res.sendFile(__dirname + "/GS_MDM4.json");
+	res.sendFile(__dirname + "/GS_SMARCA2.json");
+	console.log("Request for json");
+});
+
+app.get("/mvc", function (req, res) {
+	res.sendFile(__dirname + "/test.html");
 });
 
 var server = app.listen(3000, function () {
