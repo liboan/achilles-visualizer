@@ -1,8 +1,9 @@
 function getMean(values) { //finds mean
 	var total = 0;
 	for (var i = 0; i < values.length; i++) {
-		total += values[i];
-	}
+		if (values[i] !== null) {
+			total += values[i]};
+		}
 	return total/values.length;
 }
 
