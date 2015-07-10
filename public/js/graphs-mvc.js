@@ -569,7 +569,8 @@ function setup(data) {
                     return Math.min(y(Math.max(0, featureOutput[d])), 59);
                 })
                 .attr("height", function (d) {
-                    if (featureOutput[d] == 0) return 1; //draw 0 values, but not null values
+                    if (data.features[id].values[d] === null) return 0; //make sure nulls don't get drawn in z-score mode
+                    else if (featureOutput[d] == 0) return 1; //draw 0 values, but not null values
                     else return Math.ceil(Math.abs(y(0) - y(featureOutput[d])));
                 })
                 .attr("fill", function (d) {
