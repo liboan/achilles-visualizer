@@ -22,6 +22,12 @@ function setup(data) {
 
     data.features = data.features.slice(0,30); //keep only the top features
 
+    data.features.sort(function (a,b) {
+        if (a.importance > b.importance) return -1;
+        else if (a.importance < b.importance) return 1;
+        else return 0;
+    });
+
     a = data; //for debugging purposes
 
     //add z-scores to each feature
@@ -116,7 +122,7 @@ function setup(data) {
         };    
     }
 
-    function initClickHandlers () {
+    function initEventHandlers () {
         //Main UI Stuff
         $("#zoomIn").click(function () {
             return updateZoom(1);
@@ -142,6 +148,25 @@ function setup(data) {
 
         $("#sortT").click(function () {
             return sort(2);
+        });
+
+        //Graph Mouseover Stuff
+        $("svg").on("mousemove", function () {
+            var graphId = $(this).attr("id");
+            var graph;
+
+            if (graphId.slice(0, graphId.indexOf("Graph")) === "target") {
+                graph = "target";
+            }
+            else {
+                graph = graphId.slice(1, graphId.indexOf("Graph"));
+            }
+
+            updateTooltip(graph, event.x);
+        });
+
+        $("svg").on("mouseout", function () {
+            $("#tooltip").toggle();
         });
 
         //Feature UI Stuff
@@ -174,8 +199,9 @@ function setup(data) {
 
 
     var graphHeight = 60;
-    var leftWidth = 300;
+    var leftWidth = 260;
     var graphLeftPadding = 40;
+    var barWidth;
     var scatterHeight = 500;
     var scatterWidth = 500;
     var scatterLeftPadding = 50;
@@ -189,13 +215,14 @@ function setup(data) {
 
         initFeatureWindows(); //add features first in order to prevent counting problem
         initTargetWindow();
+        initTooltip();
 
         updateGraph("target");
         for (var i = 0; i < data.features.length; i++) {
             updateGraph(i);
         };
 
-        initClickHandlers();
+        initEventHandlers();
     }
 
     function initTargetWindow() { //special: target/prediction graph as well as experimental information, UI controls
@@ -204,7 +231,9 @@ function setup(data) {
             .style("overflow-x", "auto")                
             .attr("id", "target")
             //.style("position","fixed")
-            .style("background-color", "white");
+            .style("background-color", "white")
+            .style("margin-bottom", "10px")
+            .style("border-bottom", "1px solid black");
 
         targetWindow.append("div")
             .style("width",leftWidth + "px")
@@ -216,7 +245,7 @@ function setup(data) {
             .append("div")
             .attr("class", "title")
             .style("margin-bottom", "2px")
-            .text("GS_SMARCA2");
+            .text("GS_SMARCA2 *not in JSON :( *");
 
         d3.select("#targetLeft").selectAll("div .summary")
             .data(data.report_summary)
@@ -398,6 +427,19 @@ function setup(data) {
 
     }
 
+    function initTooltip() {
+        d3.select("body")
+            .append("div")
+            .attr("id","tooltip")
+            .style("position","fixed")
+            .style("background-color", "white")
+            .style("padding","4px")
+            .style("border", "2px solid red")
+            .style("display", "none")
+            .style("left", "100px")
+            .style("top", "100px");
+    }
+
     function updateGraph (id) { //id = string or int used to access an svg graph. "target" for target/prediction graph, an int for feature
         var featureOutput; //control bar height, values or z-scores. FEATURES ONLY!
 
@@ -430,7 +472,7 @@ function setup(data) {
 
         graph.selectAll("*").remove(); //clear previous contents
 
-        var barWidth = Math.pow(zoom, 2) + 1;
+        barWidth = Math.pow(zoom, 2) + 1;
         var graphWidth = barWidth * indices.length + graphLeftPadding; //zoom = width of bars in pixels
 
         graph.attr("width", graphWidth);
@@ -523,23 +565,34 @@ function setup(data) {
                     return barWidth;
                 })
                 .attr("y", function (d) {
-                    return y(Math.max(0, featureOutput[d]));
+                    if (featureOutput[d] == 0) return graphHeight - 1; //draw 0 values, but not null values                    
+                    return Math.min(y(Math.max(0, featureOutput[d])), 59);
                 })
                 .attr("height", function (d) {
-                    return Math.abs(y(0) - y(featureOutput[d]));
+                    if (featureOutput[d] == 0) return 1; //draw 0 values, but not null values
+                    else return Math.ceil(Math.abs(y(0) - y(featureOutput[d])));
                 })
                 .attr("fill", function (d) {
                     if (data.features[id].zScores[d] < -3) {
-                        return "lightgreen";
+                        return "limegreen";
                     }
                     else if (data.features[id].zScores[d] > 3) {
-                        return "pink";
+                        return "crimson";
                     }
                     else {
-                        return "lightgray";
+                        return "gray";
                     }
                 });
         }
+
+        graph.append("rect")
+            .attr("class","mouseTrap") //detects mouse events, b/c svg window itself cannot
+            .attr("pointer-events", "all") //make sure it catches events
+            .attr("x", graphLeftPadding)
+            .attr("y", 0)
+            .attr("width", graphWidth)
+            .attr("height", graphHeight)
+            .attr("fill","none");
 
         if (id !== "target") {    
             if (/^.MUT/.exec(data.features[id].name)) { //if it's a mutation, draw box plot instead
@@ -555,7 +608,7 @@ function setup(data) {
     }
 
     function updateScatter(id, type) {  //fill in scatter of feature value (x) vs. prediction & target (y)
-                                        //id = int, index of feature. type = string, "p" = prediction, "t" = target    
+        //id = int, index of feature. type = string, "p" = prediction, "t" = target    
         var xMin = Infinity, xMax = -Infinity; //find extent of data
         var yMin = Infinity, yMax = -Infinity;
 
@@ -638,8 +691,8 @@ function setup(data) {
             });
     }
 
-    function updateBoxPlot(id, type) {  //groups the celllines by presence of mutation, and plots their target value
-                                        //id = int, index of feature. type = string, "p" = prediction, "t" = target        
+    function updateBoxPlot(id, type) {  //groups the celllines by presence of mutation, and plots their target value    
+        //id = int, index of feature. type = string, "p" = prediction, "t" = target        
         var yMin = Infinity, yMax = -Infinity; //find extent of data
 
         var buckets = [[], [], []]; //buckets[0] is for mutation values of 0, [1] for 1, [2] for 2
@@ -848,6 +901,53 @@ function setup(data) {
 
         // console.log(boxes);
 
+    }
+
+    function updateTooltip(graph, xPos) { //Updates the tooltip whenever mouse position shifts.
+        //graph = "target" or index of feature, xPos = mouse x coordinate 
+        var index;
+        var graphElement;
+        var line1, line2, line3; //three lines to be printed, depends on what graph
+
+
+
+        if (graph === "target") {
+            graphElement = $("#targetGraph");
+            index = Math.floor((xPos - graphElement.offset().left - graphLeftPadding) / barWidth); //pixels to right of svg / # of rects 
+            // console.log(graph + " " + index + " " + data.cellline[index] + " " + data.predictions[indices[index]] + " " + data.target[indices[index]]);
+            line1 = "Cell Line: " + data.cellline[index];            
+            line2 = "Prediction: " + data.predictions[indices[index]];
+            line3 = "Target: " + data.target[indices[index]];
+        }
+        else {
+            graphElement = $("#f" + graph + "Graph");
+            index = Math.floor((xPos - graphElement.offset().left - graphLeftPadding) / barWidth);
+            // console.log(graph + " " + index + " " + data.cellline[indices[index]] + " " + data.features[graph].zScores[indices[index]]);
+            line1 = "Cell Line: " + data.cellline[index];
+            line2 = "Value: " + data.features[graph].values[indices[index]];
+            line3 = "Std. Dev.: " + data.features[graph].zScores[indices[index]];
+        }
+
+        //console.log(line1 + line2 + line3)
+
+        // console.log(graphElement.offset().top + " " + $("body").scrollTop());
+
+        var tooltip = d3.select("#tooltip")
+            .style("display","block")
+            .style("left",(xPos) + "px")
+            .style("top", (graphElement.offset().top + graphElement.height() - $("body").scrollTop()) + "px");
+
+        tooltip.selectAll("div").remove();
+
+        tooltip.selectAll("div")
+            .data([line1, line2, line3])
+            .enter()
+            .append("div")
+            .style("font","12px Arial")
+            .text(function (d) {
+                console.log(d);
+                return d;
+            });
     }
 
     //for testing & debugging
