@@ -24,6 +24,11 @@ function setup(data) {
 
     a = data; //for debugging purposes
 
+    //add z-scores to each feature
+    for (var i = 0; i < data.features.length; i++) {
+        data.features[i]["zScores"] = zScore(data.features[i].values);
+    };
+
     //initialize other model variables
     var indices = []; //for sorting and filtering
     for (var i = 0; i < data.cellline.length; i++) {
@@ -47,7 +52,10 @@ function setup(data) {
                 indices.push(i);
             }
         };
-        return indices; //problem with side effects- modifying indices in big scope while returning it at the same time
+        updateGraph("target");
+        for (var i = 0; i < data.features.length; i++) {
+            updateGraph(i);
+        };  
     }
 
     function sort(item) { //item = int specifying what to sort by. 0 = cell line lineage, 1 = predictions, 2 = target
@@ -83,7 +91,72 @@ function setup(data) {
                 });
                 break;
         }
-        return indices;
+        updateGraph("target");
+        for (var i = 0; i < data.features.length; i++) {
+            updateGraph(i);
+        };  
+    }
+
+    function toggleZScore() {
+        zScoreState = !zScoreState;
+
+        if (zScoreState) $("#zScoreButton").val("Click for values");
+        else $("#zScoreButton").val("Click for z-scores");
+
+        for (var i = 0; i < data.features.length; i++) {
+            updateGraph(i);
+        };          
+    }
+
+    function updateZoom(change) {
+        zoom = Math.max(1, Math.min(zoom + change, 20));
+        updateGraph("target");
+        for (var i = 0; i < data.features.length; i++) {
+            updateGraph(i);
+        };    
+    }
+
+    function initClickHandlers () {
+        //Main UI Stuff
+        $("#zoomIn").click(function () {
+            return updateZoom(1);
+        });
+
+        $("#zoomOut").click(function () {
+            return updateZoom(-1);
+        });
+
+        $("#zScoreButton").click(toggleZScore);
+
+        $("#filter").change(function () {
+            filter($("#filter option:selected").text());
+        });
+
+        $("#sortL").click(function () {
+            return sort(0);
+        });
+
+        $("#sortP").click(function () {
+            return sort(1);
+        });
+
+        $("#sortT").click(function () {
+            return sort(2);
+        });
+
+        //Feature UI Stuff
+        $(".detailButton").click(function () {
+            $(this).parent().parent().parent().children(".details").toggle();
+        });
+
+        //Annoying Scrolling Alignment Stuff
+        $('#target').on('scroll', function () {    
+            $('#graphWindow').scrollLeft($(this).scrollLeft());
+        });  
+
+        $('#graphWindow').on('scroll', function () {    
+            $('#target').scrollLeft($(this).scrollLeft());
+        });        
     }
 
     //for testing & debugging
@@ -100,24 +173,13 @@ function setup(data) {
     */
 
 
-    var graphHeight = 80;
+    var graphHeight = 60;
     var leftWidth = 300;
-    var graphLeftPadding = 30;
+    var graphLeftPadding = 40;
     var scatterHeight = 500;
     var scatterWidth = 500;
     var scatterLeftPadding = 50;
     var scatterTopPadding = 50;
-
-    //get filtering options. 
-    filterOptions = [""];
-    for (var i = 0; i < data.cellline.length; i++) {
-        entry = data.cellline[i];
-        option = entry.substring(entry.indexOf("_") + 1);
-        if (filterOptions.indexOf(option) == -1) {
-            filterOptions.push(option);
-        }
-    }
-    filterOptions.sort();
 
     function initWindow() {
         d3.select("body")
@@ -132,17 +194,22 @@ function setup(data) {
         for (var i = 0; i < data.features.length; i++) {
             updateGraph(i);
         };
+
+        initClickHandlers();
     }
 
     function initTargetWindow() { //special: target/prediction graph as well as experimental information, UI controls
         var targetWindow = d3.select("#graphWindow")
             .insert("div","div")
-            .attr("id", "target");
+            .style("overflow-x", "auto")                
+            .attr("id", "target")
+            //.style("position","fixed")
+            .style("background-color", "white");
 
         targetWindow.append("div")
             .style("width",leftWidth + "px")
             .style("display","inline-block")
-            .style("margin-bottom", "10px")
+            .style("margin", "4px")
             .style("font-family", "Arial")
             //.attr("class", "left")
             .attr("id", "targetLeft")
@@ -165,6 +232,85 @@ function setup(data) {
             .attr("id", "targetGraph")
             .attr("height", graphHeight);
 
+        //////Main UI stuff//////
+
+        //get filtering options. 
+        var filterOptions = [""];
+        for (var i = 0; i < data.cellline.length; i++) {
+            entry = data.cellline[i];
+            option = entry.substring(entry.indexOf("_") + 1);
+            if (filterOptions.indexOf(option) == -1) {
+                filterOptions.push(option);
+            }
+        }   
+        filterOptions.sort();        
+
+        var mainUI = targetWindow.append("div")
+            .attr("id", "mainUI")
+            .style("position","relative")
+            .style("width", "700px")
+            .style("top", ($("#targetGraph").height() - $("#target").height() + 20) + "px")
+            .style("left", ($("#targetLeft").width() + 20) + "px");
+
+        mainUI.append("span")
+            .text("Zoom ");
+
+        mainUI.append("input")
+            .attr("type", "button")
+            .attr("id", "zoomIn")
+            .attr("value", "+");        
+
+        mainUI.append("input")
+            .style("margin-right", "10px")
+            .attr("type", "button")
+            .attr("id", "zoomOut")
+            .attr("value", "-");  
+
+        mainUI.append("input")
+            .style("margin-right", "10px")        
+            .attr("type", "button")
+            .attr("id", "zScoreButton")
+            .attr("value", "Click for z-scores");
+
+        mainUI.append("span")
+            .text("Filter ");
+
+        var filter = mainUI.append("select")
+            .style("margin-right", "10px")                
+            .attr("id", "filter")
+            .attr("value","NONE");
+
+        filter.selectAll("option")
+            .data(filterOptions)
+            .enter()
+            .append("option")
+            .text(function (d) {
+                return d;
+            });
+
+        mainUI.append("span")
+            .text("Sort ");
+
+        mainUI.append("input")
+            .attr("type", "button")
+            .attr("id", "sortL")
+            .attr("value", "Lineage"); 
+
+        mainUI.append("input")
+            .attr("type", "button")
+            .attr("id", "sortP")
+            .attr("value", "Prediction"); 
+
+        mainUI.append("input")
+            .attr("type", "button")
+            .attr("id", "sortT")
+            .attr("value", "Target");                 
+        //add foundation div 
+        // d3.select("#graphWindow")
+        //     .insert("div", ".featureWindow") //insert ahead of the feature windows
+        //     .style("display","inline-block")
+        //     .style("height", $("#target").height() + "px");
+
     }
 
     function initFeatureWindows () { //reads data and adds in feature windows accordingly
@@ -173,14 +319,17 @@ function setup(data) {
             .data(data.features)
             .enter()
             .append("div")
+            .attr("class", "featureWindow"  )
             .attr("id", function (d, i) {
                 return "f" + i;
             });
 
+        //////Lefts//////
+
         var lefts = featureWindows.append("div")
             .style("width",leftWidth + "px")
             .style("display","inline-block")
-            .style("margin-bottom", "10px")            
+            .style("margin", "4px")            
             .text(function (d) {
                 return d.name;
             })
@@ -195,17 +344,29 @@ function setup(data) {
             .text(function (d) {
                 return d.importance;
             })
-            .style("padding-top", "10px")
-            .style("padding-bottom", "10px")
-            .style("margin", "8px")
+            .style("padding-top", "4px")
+            .style("padding-bottom", "4px")
+            .style("margin-top", "6px")
+            .style("margin-bottom", "6px")
             .style("width", function (d) {
-                console.log(leftWidth * d.importance);
                 return Math.floor(leftWidth * d.importance) + "px";
             })
             .style("background-color", "red")
             .style("display", "inline-block");
 
         lefts.append("br");
+
+        //////Feature UI stuff//////
+
+        var uiFields = lefts.append("div")
+            .attr("class","featureUI")
+        
+        uiFields.append("input")
+            .attr("class", "detailButton")
+            .attr("type","button")
+            .attr("value","Show/hide scatter plot or mutation plot");
+
+        //////Graphs//////
 
         var graphs = featureWindows.append("svg")
             .style("vertical-align", "top")
@@ -217,6 +378,7 @@ function setup(data) {
 
         var predictionScatters = featureWindows.append("div")
             .attr("class", "details")
+            .style("display","none")
             .append("svg")
             .attr("class", "predictionScatter")
             .attr("id", function (d, i) {
@@ -237,6 +399,17 @@ function setup(data) {
     }
 
     function updateGraph (id) { //id = string or int used to access an svg graph. "target" for target/prediction graph, an int for feature
+        var featureOutput; //control bar height, values or z-scores. FEATURES ONLY!
+
+        if (id !== "target") {
+            if (zScoreState) {
+                featureOutput = data.features[id].zScores;
+            }
+            else {
+                featureOutput = data.features[id].values;
+            }
+        }
+
         var min = 10000, max = -10000; //find extent of data
         for (var i = 0; i < indices.length; i++) {
             if (id === "target") { //if target, make sure to check both target & prediction value among indices
@@ -244,8 +417,8 @@ function setup(data) {
                 max = Math.max(max, data.target[indices[i]], data.predictions[indices[i]]);
             }
             else {
-                min = Math.min(min, data.features[id].values[indices[i]]);
-                max = Math.max(max, data.features[id].values[indices[i]]);
+                min = Math.min(min, featureOutput[indices[i]]);
+                max = Math.max(max, featureOutput[indices[i]]);
             }
         };
 
@@ -270,7 +443,7 @@ function setup(data) {
             wrapWindow = d3.select("#target");
         }
 
-        wrapWindow.style("width", (graphWidth + 500) + "px" );
+        wrapWindow.style("width", Math.max(graphWidth + 500, 1020) + "px" );
 
         var y = d3.scale.linear() //set up scale
             .domain([min,max])
@@ -326,11 +499,23 @@ function setup(data) {
 
         }
         else {
+            graph.append("text") //label
+                .text(function () {
+                    if (zScoreState) return "z-score";
+                    else return "value";
+                })
+                .attr("text-anchor","middle")
+                .attr("x", graphLeftPadding - 28)
+                .attr("y", graphHeight/2)
+                .attr("transform", "rotate(270 " + (graphLeftPadding - 28) + "," + (graphHeight/2) + ")")
+                .style("font-family", "Arial")
+                .style("font-size", "10px");
+
+
             graph.selectAll("rect")
                 .data(indices) //bind indices and use them to access pertinent values from data object
                 .enter()
                 .append("rect")
-                .attr("fill", "lightgray")
                 .attr("x", function (d, i) {
                     return i * barWidth + graphLeftPadding;
                 })
@@ -338,24 +523,35 @@ function setup(data) {
                     return barWidth;
                 })
                 .attr("y", function (d) {
-                    return y(Math.max(0, data.features[id].values[d]));
+                    return y(Math.max(0, featureOutput[d]));
                 })
                 .attr("height", function (d) {
-                    return Math.abs(y(0) - y(data.features[id].values[d]));
+                    return Math.abs(y(0) - y(featureOutput[d]));
+                })
+                .attr("fill", function (d) {
+                    if (data.features[id].zScores[d] < -3) {
+                        return "lightgreen";
+                    }
+                    else if (data.features[id].zScores[d] > 3) {
+                        return "pink";
+                    }
+                    else {
+                        return "lightgray";
+                    }
                 });
         }
 
-        if (typeof id === "number") {    
+        if (id !== "target") {    
             if (/^.MUT/.exec(data.features[id].name)) { //if it's a mutation, draw box plot instead
-                    updateBoxPlot(id, "p");
-                    updateBoxPlot(id, "t");
-                }
-                else {
-                    updateScatter(id, "p");
-                    updateScatter(id, "t");
-                }
-    
+                updateBoxPlot(id, "p");
+                updateBoxPlot(id, "t");
             }
+            else {
+                updateScatter(id, "p");
+                updateScatter(id, "t");
+            }
+
+        }
     }
 
     function updateScatter(id, type) {  //fill in scatter of feature value (x) vs. prediction & target (y)
@@ -476,8 +672,6 @@ function setup(data) {
         for (var i = 0; i < buckets.length; i++) {
             buckets[i].sort(d3.ascending);
         };
-
-        console.log(buckets);
 
         var plot = d3.select("#f" + id + type + "Scatter");
 
