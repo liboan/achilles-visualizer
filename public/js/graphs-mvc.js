@@ -8,6 +8,12 @@
 } ());
 
 function getData() {
+    /*  
+        IMPORTANT!!!!
+        At the moment, it is assumed that a list of mutations is included in the JSON file (data.mutations)
+        If the mutations are in a separate file, the program will need to be changed!
+    */
+
     $.getJSON("/json", function (data) {
         setup(data);
     });
@@ -83,17 +89,13 @@ function setup(data) {
 
             case 1: //predictions
                 indices.sort(function (a, b) {
-                    if (data.predictions[a] < data.predictions[b]) return -1;
-                    else if (data.predictions[a] > data.predictions[b]) return 1;
-                    else return 0; 
+                    return data.predictions[a] - data.predictions[b];
                 });
                 break;
 
             case 2: //target
                 indices.sort(function (a, b) {
-                    if (data.target[a] < data.target[b]) return -1;
-                    else if (data.target[a] > data.target[b]) return 1;
-                    else return 0; 
+                    return data.target[a] - data.target[b];
                 });
                 break;
         }
@@ -151,7 +153,7 @@ function setup(data) {
         });
 
         //Graph Mouseover Stuff
-        $("svg").on("mousemove", function () {
+        $(".graph").on("mousemove", function () {
             var graphId = $(this).attr("id");
             var graph;
 
@@ -162,26 +164,37 @@ function setup(data) {
                 graph = graphId.slice(1, graphId.indexOf("Graph"));
             }
 
-            updateTooltip(graph, event.x);
+            updateGraphTooltip(graph, event.x);
         });
 
-        $("svg").on("mouseout", function () {
+        $(".graph").on("mouseout", function () {
             $("#tooltip").toggle();
         });
+
+
+        //Scatter Mouseover Stuff: See code for circle creation in updateScatter()
+
+        //Box Tooltip Stuff: See code for box plot creation in updateBoxPlot() 
 
         //Feature UI Stuff
         $(".detailButton").click(function () {
             $(this).parent().parent().parent().children(".details").toggle();
+        });        
+
+        //Annoying Graph View Resize Stuff
+        $(window).on("resize", function () {
+            console.log("resize");
+            $("#mainUI").css("width", ($(window).width() - leftWidth - 40) + "px");
+            $(".graphWrapper").css("width", ($(window).width() - leftWidth - 40) + "px");
         });
 
         //Annoying Scrolling Alignment Stuff
-        $('#target').on('scroll', function () {    
-            $('#graphWindow').scrollLeft($(this).scrollLeft());
-        });  
-
-        $('#graphWindow').on('scroll', function () {    
-            $('#target').scrollLeft($(this).scrollLeft());
-        });        
+        $(".graphWrapper").on("scroll", function () {
+            var scrollX = $(this).scrollLeft();
+            $(".graphWrapper").each(function () {
+                $(this).scrollLeft(scrollX);
+            });
+        });     
     }
 
     //for testing & debugging
@@ -202,7 +215,7 @@ function setup(data) {
     var leftWidth = 260;
     var graphLeftPadding = 40;
     var barWidth;
-    var scatterHeight = 500;
+    var scatterHeight = 500; //Scatter dimensions also used for box plots.
     var scatterWidth = 500;
     var scatterLeftPadding = 50;
     var scatterTopPadding = 50;
@@ -211,12 +224,11 @@ function setup(data) {
         d3.select("body")
             .append("div")
             .attr("id","graphWindow")
-            .style("overflow-x","auto");
 
         initFeatureWindows(); //add features first in order to prevent counting problem
         initTargetWindow();
         initTooltip();
-
+        initBoxTooltip();
         updateGraph("target");
         for (var i = 0; i < data.features.length; i++) {
             updateGraph(i);
@@ -228,9 +240,8 @@ function setup(data) {
     function initTargetWindow() { //special: target/prediction graph as well as experimental information, UI controls
         var targetWindow = d3.select("#graphWindow")
             .insert("div","div")
-            .style("overflow-x", "auto")                
             .attr("id", "target")
-            //.style("position","fixed")
+            .style("position","fixed")
             .style("background-color", "white")
             .style("margin-bottom", "10px")
             .style("border-bottom", "1px solid black");
@@ -256,8 +267,16 @@ function setup(data) {
                 return d;
             });
 
-        targetWindow.append("svg")
+        var graphWrapper = targetWindow.append("div")
+            .attr("class", "graphWrapper")
             .style("vertical-align", "top")
+            .style("display", "inline-block")
+            .style("width", ($(window).width() - leftWidth - 40) + "px")
+            .style("overflow-x", "auto")
+
+        graphWrapper.append("svg")
+            .style("vertical-align", "top")
+            .attr("class", "graph")
             .attr("id", "targetGraph")
             .attr("height", graphHeight);
 
@@ -278,19 +297,23 @@ function setup(data) {
             .attr("id", "mainUI")
             .style("position","relative")
             .style("width", "700px")
+            .style("height", "1px") //for some reason this gets rid of extra space on the target window
             .style("top", ($("#targetGraph").height() - $("#target").height() + 20) + "px")
             .style("left", ($("#targetLeft").width() + 20) + "px");
 
-        mainUI.append("span")
+        var zoomDiv = mainUI.append("div")
+            .style("display", "inline-block")            
+            .style("margin", "6px");
+
+        zoomDiv.append("span")
             .text("Zoom ");
 
-        mainUI.append("input")
+        zoomDiv.append("input")
             .attr("type", "button")
             .attr("id", "zoomIn")
             .attr("value", "+");        
 
-        mainUI.append("input")
-            .style("margin-right", "10px")
+        zoomDiv.append("input")
             .attr("type", "button")
             .attr("id", "zoomOut")
             .attr("value", "-");  
@@ -299,13 +322,16 @@ function setup(data) {
             .style("margin-right", "10px")        
             .attr("type", "button")
             .attr("id", "zScoreButton")
-            .attr("value", "Click for z-scores");
+            .attr("value", "Show z-scores");
 
-        mainUI.append("span")
+        var filterDiv = mainUI.append("div")
+            .style("display", "inline-block")        
+            .style("margin", "6px");
+
+        filterDiv.append("span")
             .text("Filter ");
 
-        var filter = mainUI.append("select")
-            .style("margin-right", "10px")                
+        var filter = filterDiv.append("select")
             .attr("id", "filter")
             .attr("value","NONE");
 
@@ -317,28 +343,33 @@ function setup(data) {
                 return d;
             });
 
-        mainUI.append("span")
+        var sortDiv = mainUI.append("div")
+            .style("display", "inline-block")
+            .style("margin", "6px");
+
+        sortDiv.append("span")
             .text("Sort ");
 
-        mainUI.append("input")
+        sortDiv.append("input")
             .attr("type", "button")
             .attr("id", "sortL")
             .attr("value", "Lineage"); 
 
-        mainUI.append("input")
+        sortDiv.append("input")
             .attr("type", "button")
             .attr("id", "sortP")
             .attr("value", "Prediction"); 
 
-        mainUI.append("input")
+        sortDiv.append("input")
             .attr("type", "button")
             .attr("id", "sortT")
             .attr("value", "Target");                 
-        //add foundation div 
-        // d3.select("#graphWindow")
-        //     .insert("div", ".featureWindow") //insert ahead of the feature windows
-        //     .style("display","inline-block")
-        //     .style("height", $("#target").height() + "px");
+        
+        //add foundation div to sit underneath target window
+        d3.select("#graphWindow")
+            .insert("div", ".featureWindow") //insert ahead of the feature windows
+            .style("display","inline-block")
+            .style("height", ($("#target").height() + 10) + "px");
 
     }
 
@@ -397,7 +428,26 @@ function setup(data) {
 
         //////Graphs//////
 
-        var graphs = featureWindows.append("svg")
+
+
+        // if (id !== "target") {    
+        //     if (/^.MUT/.exec(data.features[id].name)) { //if it's a mutation, draw box plot instead
+ 
+        //     }
+        //     else {
+
+        //     }
+        // }        
+
+        var graphWrapper = featureWindows.append("div")
+            .attr("class", "graphWrapper")
+            .style("vertical-align", "top")
+            .style("display", "inline-block")
+            .style("width",($(window).width() - leftWidth - 40) + "px")
+            .style("overflow-x", "auto");
+
+        var graphs = graphWrapper.append("svg")
+            .attr("class", "graph")
             .style("vertical-align", "top")
             .attr("id", function (d, i) {
                 return "f" + i + "Graph";
@@ -409,18 +459,26 @@ function setup(data) {
             .attr("class", "details")
             .style("display","none")
             .append("svg")
-            .attr("class", "predictionScatter")
+            .attr("class", "prediction")
+            .attr("class", function (d, i) {
+                if (/^.MUT/.exec(data.features[i].name)) return "box"; //if it's a mutation, it's a box plot
+                else return "scatter";
+            })
             .attr("id", function (d, i) {
-                return "f" + i + "pScatter";
+                return "f" + i + "p";
             })
             .attr("width", scatterHeight)
             .attr("height", scatterWidth);
 
         var targetScatters = d3.selectAll(".details")
             .append("svg")
-            .attr("class", "targetScatter")
+            .attr("class", "target")
+            .attr("class", function (d, i) {
+                if (/^.MUT/.exec(data.features[i].name)) return "box"; //if it's a mutation, it's a box plot
+                else return "scatter";                
+            })
             .attr("id", function (d, i) {
-                return "f" + i + "tScatter";
+                return "f" + i + "t";
             })
             .attr("width", scatterHeight)
             .attr("height", scatterWidth);
@@ -438,6 +496,20 @@ function setup(data) {
             .style("display", "none")
             .style("left", "100px")
             .style("top", "100px");
+    }
+
+    function initBoxTooltip() {
+        d3.selectAll(".details")
+            .insert("div","svg")
+            .attr("class","boxTooltip")
+            .style("left", "350px") //arbitrary positioning!
+            .style("top", "0px")                     
+            .style("position","absolute")
+            .style("background-color", "white")
+            .style("padding","4px")
+            .style("border", "2px solid red")
+            .style("display", "none")
+            .style("z-index", "1")
     }
 
     function updateGraph (id) { //id = string or int used to access an svg graph. "target" for target/prediction graph, an int for feature
@@ -485,7 +557,7 @@ function setup(data) {
             wrapWindow = d3.select("#target");
         }
 
-        wrapWindow.style("width", Math.max(graphWidth + 500, 1020) + "px" );
+        // wrapWindow.style("width", Math.max(graphWidth + 500, 1020) + "px" );
 
         var y = d3.scale.linear() //set up scale
             .domain([min,max])
@@ -497,7 +569,7 @@ function setup(data) {
             .ticks(5);
 
         graph.append("g") //add axis to svg
-            .attr("transform", "translate(" + graphLeftPadding + ",0)")
+            .attr("transform", "translate(" + (graphLeftPadding-1) + ",0)")
             .call(yAxis)
             .selectAll("path")
             .style("stroke-width", "1px")
@@ -581,7 +653,7 @@ function setup(data) {
                         return "crimson";
                     }
                     else {
-                        return "gray";
+                        return "lightgray";
                     }
                 });
         }
@@ -604,7 +676,6 @@ function setup(data) {
                 updateScatter(id, "p");
                 updateScatter(id, "t");
             }
-
         }
     }
 
@@ -633,7 +704,7 @@ function setup(data) {
                 output = data.predictions;
         }
 
-        var scatter = d3.select("#f" + id + type + "Scatter");
+        var scatter = d3.select("#f" + id + type);
 
         scatter.selectAll("*").remove(); //clean up graph
 
@@ -689,14 +760,44 @@ function setup(data) {
                     case "t":
                         return "red";
                 }
+            })
+            .on("mouseover", function (d) {
+                //console.log($(scatter[0]).attr("id") + " " + data.cellline[d] + " " + data.features[id].values[d] + " " + output[d]);
+                updateScatterTooltip($(scatter[0]).attr("id"), data.cellline[d]);
+            })
+            .on("mouseout", function () {
+                $("#tooltip").toggle();
             });
+
+        scatter.append("text") //x-axis label
+            .attr("x", scatterWidth/2)
+            .attr("y", scatterHeight - scatterTopPadding + 32)
+            .style("font", "14px Arial")
+            .attr("text-anchor", "middle")
+            .text("Feature Value");
+
+        scatter.append("text") //y-axis label
+            .attr("x", scatterLeftPadding - 30)
+            .attr("y", scatterHeight/2)
+            .style("font-family", "Arial")
+            .attr("transform", "rotate(270 " + (scatterLeftPadding - 30) + "," + (scatterHeight/2) + ")")
+            .attr("text-anchor", "middle")
+            .text(function () {
+                switch (type) {
+                    case "p": 
+                        return "Prediction Value";
+                    case "t":
+                        return "Target Value";
+                }
+            });         
     }
 
-    function updateBoxPlot(id, type) {  //groups the celllines by presence of mutation, and plots their target value    
+    function updateBoxPlot(id, type) {  //groups the celllines by presence of mutation, and plots their prediction or target value    
         //id = int, index of feature. type = string, "p" = prediction, "t" = target        
         var yMin = Infinity, yMax = -Infinity; //find extent of data
 
         var buckets = [[], [], []]; //buckets[0] is for mutation values of 0, [1] for 1, [2] for 2
+                                    //for each bucket member, [pred/targ val, index]
 
         var output; //depending on type, either data.predictions or data.target. Makes stuff simpler.
 
@@ -718,19 +819,20 @@ function setup(data) {
             //console.log(data.features[id].values[indices[i]]);
 
             if (data.features[id].values[indices[i]] !== null) {
-                buckets[data.features[id].values[indices[i]]].push(output[indices[i]]);
+                buckets[data.features[id].values[indices[i]]].push([output[indices[i]], indices[i]]);
             }
         };
         //console.log([yMin,yMax]);
 
         for (var i = 0; i < buckets.length; i++) {
-            buckets[i].sort(d3.ascending);
+            buckets[i].sort(function (a, b) {
+                return a[0] - b[0];
+            });
         };
 
-        var plot = d3.select("#f" + id + type + "Scatter");
+        var plot = d3.select("#f" + id + type);
 
         plot.selectAll("*").remove();
-
 
         var y = d3.scale.linear() //set up scale
             .domain([yMin,yMax])
@@ -765,22 +867,52 @@ function setup(data) {
             .style("stroke","black")
             .style("fill","none");
 
+        plot.append("text") //y-axis label
+            .attr("x", scatterLeftPadding - 30)
+            .attr("y", scatterHeight/2)
+            .style("font-family", "Arial")
+            .attr("transform", "rotate(270 " + (scatterLeftPadding - 30) + "," + (scatterHeight/2) + ")")
+            .attr("text-anchor", "middle")
+            .text(function () {
+                switch (type) {
+                    case "p": 
+                        return "Prediction Value";
+                    case "t":
+                        return "Target Value";
+                }
+            });     
+
+        plot.append("text") //x-axis label
+            .attr("x", scatterWidth/2)
+            .attr("y", scatterHeight - scatterTopPadding + 32)
+            .style("font", "14px Arial")
+            .attr("text-anchor", "middle")
+            .text("Feature Mutation Frequency");       
+
         var boxes = plot.selectAll("g .boxPlot")
             .data(buckets)
             .enter()
             .append("g")
             .attr("class", "boxPlot");
 
+        function getElement(bucket, n) { //because bucket elements are now arrays, return an array of the nth element of bucket elements (values)
+            var values = [];
+            bucket.forEach(function (x) {
+                values.push(x[n]); //push the first element of the bucket element (value)
+            });
+            return values;
+        }
+
         boxes.append("rect") //rectangles for interquartile range
             .attr("x", function (d, i) { //because we bound buckets, d is going to be the array of data values.
                 return 125 + 100 * i; //tick marks are @ 150, 250, 350. Start 25 before that
             })
             .attr("y", function (d, i) {
-                return y(d3.quantile(d, 0.75)); //top of box starts at third quartile (scaled)
+                return y(d3.quantile(getElement(d,0), 0.75)); //top of box starts at third quartile (scaled)
             })
             .attr("width", 50)
             .attr("height", function (d) {
-                return y(d3.quantile(d, 0.25)) - y(d3.quantile(d, 0.75));
+                return y(d3.quantile(getElement(d,0), 0.25)) - y(d3.quantile(getElement(d,0), 0.75));
             })
             .style("stroke", "black")
             .style("fill", "none");
@@ -793,10 +925,10 @@ function setup(data) {
                 return 125 + 100 * i + 50;
             })
             .attr("y1", function (d) {
-                return y(d3.max(d));
+                return y(d3.max(getElement(d,0)));
             })
             .attr("y2", function (d) {
-                return y(d3.max(d));
+                return y(d3.max(getElement(d,0)));
             })
             .style("stroke", function () {
                 switch (type) {
@@ -816,10 +948,10 @@ function setup(data) {
                 return 125 + 100 * i + 50;
             })
             .attr("y1", function (d) {
-                return y(d3.min(d));
+                return y(d3.min(getElement(d,0)));
             })
             .attr("y2", function (d) {
-                return y(d3.min(d));
+                return y(d3.min(getElement(d,0)));
             })
             .style("stroke", function () {
                 switch (type) {
@@ -839,10 +971,10 @@ function setup(data) {
                 return 125 + 100 * i + 50;
             })
             .attr("y1", function (d) {
-                return y(d3.median(d));
+                return y(d3.median(getElement(d,0)));
             })
             .attr("y2", function (d) {
-                return y(d3.median(d));
+                return y(d3.median(getElement(d,0)));
             })
             .style("stroke", function () {
                 switch (type) {
@@ -862,10 +994,10 @@ function setup(data) {
                 return 150 + 100 * i;
             })
             .attr("y1", function (d) {
-                return y(d3.max(d));
+                return y(d3.max(getElement(d,0)));
             })
             .attr("y2", function (d) {
-                return y(d3.quantile(d, 0.75));
+                return y(d3.quantile(getElement(d,0), 0.75));
             })
             .style("stroke", function () {
                 switch (type) {
@@ -885,10 +1017,10 @@ function setup(data) {
                 return 150 + 100 * i;
             })
             .attr("y1", function (d) {
-                return y(d3.min(d));
+                return y(d3.min(getElement(d,0)));
             })
             .attr("y2", function (d) {
-                return y(d3.quantile(d, 0.25));
+                return y(d3.quantile(getElement(d,0), 0.25));
             })
             .style("stroke", function () {
                 switch (type) {
@@ -900,11 +1032,54 @@ function setup(data) {
             })
             .style("stroke-width", "1px");
 
-        // console.log(boxes);
+        boxes.append("rect")
+            .attr("x", function (d, i) { 
+                return 125 + 100 * i; 
+            })
+            .attr("y", scatterTopPadding)
+            .attr("width", 50)
+            .attr("height", scatterHeight - 2 * scatterTopPadding)
+            .attr("fill", "gray")
+            .attr("pointer-events", "all")
+            .attr("fill-opacity", 0.0)
+            .on("mouseover", function () {
+                d3.select(this).attr("fill-opacity", 0.1);
+            })
+            .on("mouseout", function () {
+                d3.select(this).attr("fill-opacity", 0.0);
+            })
+            .on("click", function (d) {
+                var feature = $(boxes[0][0]).parent().parent().parent().attr("id"); //get id of the feature window
+                var boxIndex = (parseInt($(this).attr("x")) - 125)/100; //working backwards to get the box's index :-/ 
+                var bucketMemberIndices = getElement(d, 1); //get indices of bucket members
 
+                var bucketMembers = [];
+
+                bucketMemberIndices.sort(function (a, b) { //comparing two indices.
+                    var aString = data.cellline[a];
+                    var bString = data.cellline[b];
+
+                    var aLineage = aString.substring(aString.indexOf("_") + 1); //to sort by lineage, chop off stuff up to first underscore
+                    var bLineage = bString.substring(bString.indexOf("_") + 1); 
+
+                    if (aLineage < bLineage) return -1;
+                    else if (aLineage > bLineage) return 1;
+                    else return 0;
+
+                });
+
+                bucketMemberIndices.forEach(function (x) {
+                    bucketMembers.push(data.cellline[x]);
+                });
+
+                var bucketNumbers = [d3.min(getElement(d,0)), d3.quantile(getElement(d,0), 0.25), d3.median(getElement(d,0)),
+                                     d3.quantile(getElement(d,0), 0.75), d3.max(getElement(d,0))];                
+
+                updateBoxTooltip(feature, boxIndex, bucketMembers, bucketNumbers);
+            });
     }
 
-    function updateTooltip(graph, xPos) { //Updates the tooltip whenever mouse position shifts.
+    function updateGraphTooltip(graph, xPos) { //Updates the main graph tooltip whenever mouse position shifts.
         //graph = "target" or index of feature, xPos = mouse x coordinate 
         var index;
         var graphElement;
@@ -916,17 +1091,19 @@ function setup(data) {
             graphElement = $("#targetGraph");
             index = Math.floor((xPos - graphElement.offset().left - graphLeftPadding) / barWidth); //pixels to right of svg / # of rects 
             // console.log(graph + " " + index + " " + data.cellline[index] + " " + data.predictions[indices[index]] + " " + data.target[indices[index]]);
-            line1 = "Cell Line: " + data.cellline[index];            
-            line2 = "Prediction: " + data.predictions[indices[index]];
-            line3 = "Target: " + data.target[indices[index]];
+            line1 = "Cell Line: " + data.cellline[indices[index]];            
+            line2 = "Prediction: " + (data.predictions[indices[index]]).toFixed(4);
+            line3 = "Target: " + (data.target[indices[index]]).toFixed(4);
         }
         else {
             graphElement = $("#f" + graph + "Graph");
             index = Math.floor((xPos - graphElement.offset().left - graphLeftPadding) / barWidth);
             // console.log(graph + " " + index + " " + data.cellline[indices[index]] + " " + data.features[graph].zScores[indices[index]]);
-            line1 = "Cell Line: " + data.cellline[index];
-            line2 = "Value: " + data.features[graph].values[indices[index]];
-            line3 = "Std. Dev.: " + data.features[graph].zScores[indices[index]];
+            line1 = "Cell Line: " + data.cellline[indices[index]];
+
+            if (data.features[graph].values[indices[index]] !== null) line2 = "Value: " + (data.features[graph].values[indices[index]]).toFixed(4);
+            else line2 = "Value: null";
+            line3 = "Std. Dev.: " + (data.features[graph].zScores[indices[index]]).toFixed(4);
         }
 
         //console.log(line1 + line2 + line3)
@@ -934,11 +1111,16 @@ function setup(data) {
         // console.log(graphElement.offset().top + " " + $("body").scrollTop());
 
         var tooltip = d3.select("#tooltip")
-            .style("display","block")
-            .style("left",(xPos) + "px")
-            .style("top", (graphElement.offset().top + graphElement.height() - $("body").scrollTop()) + "px");
+            .style("display",function () {
+                if (xPos > graphLeftPadding) return "block"; //only have the tooltip show up when it is on graph bars
+                else return "none";
+            })
+            .style("left",(xPos-60) + "px")
+            .style("top", (graphElement.offset().top + graphElement.height() - $("body").scrollTop()) + "px")
+            .style("width", "auto")
+            .style("height", "auto");
 
-        tooltip.selectAll("div").remove();
+        tooltip.selectAll("*").remove();
 
         tooltip.selectAll("div")
             .data([line1, line2, line3])
@@ -946,9 +1128,133 @@ function setup(data) {
             .append("div")
             .style("font","12px Arial")
             .text(function (d) {
-                console.log(d);
                 return d;
             });
+    }
+
+    function updateBoxTooltip (feature, boxIndex, bucketMembers, bucketNumbers) { 
+        //feature = string, id of feature window, boxIndex = int, 0,1,2, bucketMembers = array of strings, celllines in the bucket
+        //bucketNumbers = array of ints, [min, 1st quartile, median, 3rd quartile, max]
+
+        var featureName = data.features[parseInt(feature.slice(1))].name; //get name of feature
+        var geneName = "GS" + featureName.slice(featureName.indexOf("_")); //Chop the mutation type, replace with "GS", to yield "GS_SMARCA2"
+        console.log(geneName);
+
+        var bucketDetails = []; //array of objects with celllines and mutation info if any
+
+        /*
+            How to deal with mutation details? Most cell lines have mutations hitting genes other than SMARCA2
+
+        */
+
+
+
+        for (var i = 0; i < bucketMembers.length; i++) {
+            var search = $.grep(data.mutations, function (element) { //search mutation array by property cellline
+                return element.target === geneName;
+            });
+
+            console.log(search.length);
+
+            if (search.length == 0) { //if no search results
+                bucketDetails.push({
+                    cellline: x,
+                    mutations: []
+                });
+            }
+            else {
+                bucketDetails.concat(search);
+                console.log(search);
+            }
+        };
+
+        var detailDiv = $("#" + feature + " .details");
+
+        var tooltip = d3.select("#" + feature + " .boxTooltip")
+            .style("display","inline-block")
+            .style("left", (detailDiv.width()/2 - scatterLeftPadding * 2 - 20) + "px") //arbitrary positioning!
+            .style("top", (detailDiv.offset().top + scatterTopPadding) + "px")
+            .style("overflow-y", "auto")            
+            .style("width", "220px")
+            .style("height", "400px");
+
+        tooltip.selectAll("*").remove();
+
+        tooltip.append("div")
+            .attr("class", "tooltipExit")
+            .style("text-align", "center")
+            .style("font", "10px Arial")
+            .style("margin-bottom","5px")
+            .style("background-color", "lightgray")
+            .text("Click to hide")
+            .on("click", function () {
+                $("#" + feature + " .boxTooltip").toggle();
+            });            
+
+        tooltip.append("div")
+            .attr("id", "bucketTitle")
+            .style("text-align", "center")
+            .style("font", "13px Arial")
+            .text(function () {
+                return boxIndex + " Muts (" + bucketMembers.length + " lines)";
+            })
+
+        var detailTable = tooltip.append("table")
+            .style("width", "100%")
+            .style("margin-bottom", "8px")
+
+        detailTable.append("tr")
+            .selectAll("td")
+            .data(["Min","1Q", "Med", "3Q", "Max"])
+            .enter()
+            .append("td")
+            .style("font", "11px Arial")
+            .style("text-align", "center")
+            .text(function (d) {
+                return d;
+            });
+
+        detailTable.append("tr")
+            .selectAll("td")
+            .data(bucketNumbers)
+            .enter()
+            .append("td")
+            .style("font", "11px Arial")
+            .style("text-align", "center")
+            .text(function (d) {
+                return d.toFixed(4);
+            });  
+
+        tooltip.selectAll("div .bucketMembers")
+            .data(bucketMembers)
+            .enter()
+            .append("div")
+            .attr("class", "bucketMembers")
+            .style("word-wrap","break-word")
+            .style("margin-bottom", "2px")            
+            .style("font", "10px Arial")
+            .text(function (d) {
+                return d;
+            });
+    }
+
+    function updateScatterTooltip(graph, cellline) { //Updates the scatterplot tooltip whenever mouse is over a circle
+        //graph = string, id of the graph, cellline = string, name of cellline
+        var graphElement = $("#" + graph);
+        console.log(graph + " " + graphElement.offset().left);
+
+        var tooltip = d3.select("#tooltip")
+            .style("display","block")
+            .style("left",(graphElement.offset().left) + "px")
+            .style("top", (graphElement.offset().top - $("body").scrollTop()) + "px")
+            .style("width", "auto")
+            .style("height", "auto");
+
+        tooltip.selectAll("*").remove();
+
+        tooltip.append("div") 
+            .style("font","12px Arial")
+            .text(cellline);
     }
 
     //for testing & debugging
