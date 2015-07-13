@@ -1,0 +1,1454 @@
+[
+  {
+    "cellline": "NCIH660_PROSTATE", 
+    "mutations": [
+      {
+        "mut": "p.E206G", 
+        "freq": 0.514706
+      }
+    ], 
+    "target": "GS_SMARCA4"
+  }, 
+  {
+    "cellline": "SNUC2A_LARGE_INTESTINE", 
+    "mutations": [
+      {
+        "mut": "p.G635E", 
+        "freq": 0.372881
+      }
+    ], 
+    "target": "GS_SMARCA4"
+  }, 
+  {
+    "cellline": "HEC251_ENDOMETRIUM", 
+    "mutations": [
+      {
+        "mut": "p.R862H", 
+        "freq": 0.556962
+      }
+    ], 
+    "target": "GS_SMARCA4"
+  }, 
+  {
+    "cellline": "NCIH660_PROSTATE", 
+    "mutations": [
+      {
+        "mut": "p.E206G", 
+        "freq": 0.514706
+      }
+    ], 
+    "target": "GS_SMARCA4"
+  }, 
+  {
+    "cellline": "SNUC2A_LARGE_INTESTINE", 
+    "mutations": [
+      {
+        "mut": "p.G635E", 
+        "freq": 0.372881
+      }
+    ], 
+    "target": "GS_SMARCA4"
+  }, 
+  {
+    "cellline": "HEC251_ENDOMETRIUM", 
+    "mutations": [
+      {
+        "mut": "p.R862H", 
+        "freq": 0.556962
+      }
+    ], 
+    "target": "GS_SMARCA4"
+  }, 
+  {
+    "cellline": "MDAPCA2B_PROSTATE", 
+    "mutations": [
+      {
+        "mut": "p.R313C", 
+        "freq": 0.583333
+      }
+    ], 
+    "target": "GS_ANO6"
+  }, 
+  {
+    "cellline": "EFO27_OVARY", 
+    "mutations": [
+      {
+        "mut": "p.PPH53fs", 
+        "freq": 0.272727
+      }
+    ], 
+    "target": "GS_OXNAD1"
+  }, 
+  {
+    "cellline": "HS294T_SKIN", 
+    "mutations": [
+      {
+        "mut": "p.K8fs", 
+        "freq": 0.146667
+      }
+    ], 
+    "target": "GS_OXNAD1"
+  }, 
+  {
+    "cellline": "NCIH1395_LUNG", 
+    "mutations": [
+      {
+        "mut": "p.K8fs", 
+        "freq": 0.204545
+      }
+    ], 
+    "target": "GS_OXNAD1"
+  }, 
+  {
+    "cellline": "KNS60_CENTRAL_NERVOUS_SYSTEM", 
+    "mutations": [
+      {
+        "mut": "p.Q187*", 
+        "freq": 0.155172
+      }
+    ], 
+    "target": "GS_CNTN1"
+  }, 
+  {
+    "cellline": "22RV1_PROSTATE", 
+    "mutations": [
+      {
+        "mut": "p.R508C", 
+        "freq": 0.514286
+      }
+    ], 
+    "target": "GS_NAV3"
+  }, 
+  {
+    "cellline": "HEYA8_OVARY", 
+    "mutations": [
+      {
+        "mut": "p.S523P", 
+        "freq": 0.144068
+      }
+    ], 
+    "target": "GS_NAV3"
+  }, 
+  {
+    "cellline": "SF295_CENTRAL_NERVOUS_SYSTEM", 
+    "mutations": [
+      {
+        "mut": "p.L418S", 
+        "freq": 0.323529
+      }
+    ], 
+    "target": "GS_NAV3"
+  }, 
+  {
+    "cellline": "ESS1_ENDOMETRIUM", 
+    "mutations": [
+      {
+        "mut": "p.S1688Y", 
+        "freq": 0.485714
+      }
+    ], 
+    "target": "GS_NAV3"
+  }, 
+  {
+    "cellline": "HEC251_ENDOMETRIUM", 
+    "mutations": [
+      {
+        "mut": "p.S576I", 
+        "freq": 0.547619
+      }, 
+      {
+        "mut": "p.E376D", 
+        "freq": 0.348837
+      }
+    ], 
+    "target": "GS_NAV3"
+  }, 
+  {
+    "cellline": "JHH5_LIVER", 
+    "mutations": [
+      {
+        "mut": "p.T219R", 
+        "freq": 0.442748
+      }
+    ], 
+    "target": "GS_NAV3"
+  }, 
+  {
+    "cellline": "JHUEM2_ENDOMETRIUM", 
+    "mutations": [
+      {
+        "mut": "p.T219R", 
+        "freq": 0.251208
+      }
+    ], 
+    "target": "GS_NAV3"
+  }, 
+  {
+    "cellline": "MDAPCA2B_PROSTATE", 
+    "mutations": [
+      {
+        "mut": "p.C1560R", 
+        "freq": 0.396226
+      }, 
+      {
+        "mut": "p.Q1470R", 
+        "freq": 0.496
+      }
+    ], 
+    "target": "GS_NAV3"
+  }, 
+  {
+    "cellline": "NCIH2286_LUNG", 
+    "mutations": [
+      {
+        "mut": "p.G47D", 
+        "freq": 0.409091
+      }
+    ], 
+    "target": "GS_NAV3"
+  }, 
+  {
+    "cellline": "SNU601_STOMACH", 
+    "mutations": [
+      {
+        "mut": "p.H1740L", 
+        "freq": 0.487805
+      }
+    ], 
+    "target": "GS_NAV3"
+  }, 
+  {
+    "cellline": "TUHR14TKB_KIDNEY", 
+    "mutations": [
+      {
+        "mut": "p.T2359S", 
+        "freq": 0.465116
+      }
+    ], 
+    "target": "GS_NAV3"
+  }, 
+  {
+    "cellline": "HLF_LIVER", 
+    "mutations": [
+      {
+        "mut": "p.R578C", 
+        "freq": 0.348371
+      }
+    ], 
+    "target": "GS_AKAP17A"
+  }, 
+  {
+    "cellline": "HCC2450_LUNG", 
+    "mutations": [
+      {
+        "mut": "p.R691T", 
+        "freq": 0.349254
+      }
+    ], 
+    "target": "GS_AKAP17A"
+  }, 
+  {
+    "cellline": "HEC59_ENDOMETRIUM", 
+    "mutations": [
+      {
+        "mut": "p.R363C", 
+        "freq": 0.307692
+      }
+    ], 
+    "target": "GS_AKAP17A"
+  }, 
+  {
+    "cellline": "22RV1_PROSTATE", 
+    "mutations": [
+      {
+        "mut": "p.R508C", 
+        "freq": 0.514286
+      }
+    ], 
+    "target": "GS_NAV3"
+  }, 
+  {
+    "cellline": "HEYA8_OVARY", 
+    "mutations": [
+      {
+        "mut": "p.S523P", 
+        "freq": 0.144068
+      }
+    ], 
+    "target": "GS_NAV3"
+  }, 
+  {
+    "cellline": "SF295_CENTRAL_NERVOUS_SYSTEM", 
+    "mutations": [
+      {
+        "mut": "p.L418S", 
+        "freq": 0.323529
+      }
+    ], 
+    "target": "GS_NAV3"
+  }, 
+  {
+    "cellline": "ESS1_ENDOMETRIUM", 
+    "mutations": [
+      {
+        "mut": "p.S1688Y", 
+        "freq": 0.485714
+      }
+    ], 
+    "target": "GS_NAV3"
+  }, 
+  {
+    "cellline": "HEC251_ENDOMETRIUM", 
+    "mutations": [
+      {
+        "mut": "p.S576I", 
+        "freq": 0.547619
+      }, 
+      {
+        "mut": "p.E376D", 
+        "freq": 0.348837
+      }
+    ], 
+    "target": "GS_NAV3"
+  }, 
+  {
+    "cellline": "JHH5_LIVER", 
+    "mutations": [
+      {
+        "mut": "p.T219R", 
+        "freq": 0.442748
+      }
+    ], 
+    "target": "GS_NAV3"
+  }, 
+  {
+    "cellline": "JHUEM2_ENDOMETRIUM", 
+    "mutations": [
+      {
+        "mut": "p.T219R", 
+        "freq": 0.251208
+      }
+    ], 
+    "target": "GS_NAV3"
+  }, 
+  {
+    "cellline": "MDAPCA2B_PROSTATE", 
+    "mutations": [
+      {
+        "mut": "p.C1560R", 
+        "freq": 0.396226
+      }, 
+      {
+        "mut": "p.Q1470R", 
+        "freq": 0.496
+      }
+    ], 
+    "target": "GS_NAV3"
+  }, 
+  {
+    "cellline": "NCIH2286_LUNG", 
+    "mutations": [
+      {
+        "mut": "p.G47D", 
+        "freq": 0.409091
+      }
+    ], 
+    "target": "GS_NAV3"
+  }, 
+  {
+    "cellline": "SNU601_STOMACH", 
+    "mutations": [
+      {
+        "mut": "p.H1740L", 
+        "freq": 0.487805
+      }
+    ], 
+    "target": "GS_NAV3"
+  }, 
+  {
+    "cellline": "TUHR14TKB_KIDNEY", 
+    "mutations": [
+      {
+        "mut": "p.T2359S", 
+        "freq": 0.465116
+      }
+    ], 
+    "target": "GS_NAV3"
+  }, 
+  {
+    "cellline": "GP2D_LARGE_INTESTINE", 
+    "mutations": [
+      {
+        "mut": "p.S665P", 
+        "freq": 0.509091
+      }
+    ], 
+    "target": "GS_PER1"
+  }, 
+  {
+    "cellline": "LN428_CENTRAL_NERVOUS_SYSTEM", 
+    "mutations": [
+      {
+        "mut": "p.P628A", 
+        "freq": 0.636364
+      }
+    ], 
+    "target": "GS_PER1"
+  }, 
+  {
+    "cellline": "RKN_SOFT_TISSUE", 
+    "mutations": [
+      {
+        "mut": "p.D1048N", 
+        "freq": 0.615385
+      }
+    ], 
+    "target": "GS_PER1"
+  }, 
+  {
+    "cellline": "TE15_OESOPHAGUS", 
+    "mutations": [
+      {
+        "mut": "p.V368M", 
+        "freq": 1.0
+      }
+    ], 
+    "target": "GS_PER1"
+  }, 
+  {
+    "cellline": "CORL105_LUNG", 
+    "mutations": [
+      {
+        "mut": "p.P9L", 
+        "freq": 0.592593
+      }
+    ], 
+    "target": "GS_PER1"
+  }, 
+  {
+    "cellline": "HCC1500_BREAST", 
+    "mutations": [
+      {
+        "mut": "p.V145M", 
+        "freq": 0.534483
+      }
+    ], 
+    "target": "GS_PER1"
+  }, 
+  {
+    "cellline": "HCC33_LUNG", 
+    "mutations": [
+      {
+        "mut": "p.P935L", 
+        "freq": 0.166667
+      }
+    ], 
+    "target": "GS_PER1"
+  }, 
+  {
+    "cellline": "HCC38_BREAST", 
+    "mutations": [
+      {
+        "mut": "p.L823V", 
+        "freq": 0.75
+      }
+    ], 
+    "target": "GS_PER1"
+  }, 
+  {
+    "cellline": "LNCAPCLONEFGC_PROSTATE", 
+    "mutations": [
+      {
+        "mut": "p.S269Y", 
+        "freq": 0.121212
+      }
+    ], 
+    "target": "GS_PER1"
+  }, 
+  {
+    "cellline": "NCIH2009_LUNG", 
+    "mutations": [
+      {
+        "mut": "p.S665L", 
+        "freq": 0.214286
+      }
+    ], 
+    "target": "GS_PER1"
+  }, 
+  {
+    "cellline": "NCIH2170_LUNG", 
+    "mutations": [
+      {
+        "mut": "p.E1234K", 
+        "freq": 0.301887
+      }
+    ], 
+    "target": "GS_PER1"
+  }, 
+  {
+    "cellline": "NCIH322_LUNG", 
+    "mutations": [
+      {
+        "mut": "p.L485P", 
+        "freq": 0.346154
+      }
+    ], 
+    "target": "GS_PER1"
+  }, 
+  {
+    "cellline": "SNU719_STOMACH", 
+    "mutations": [
+      {
+        "mut": "p.P657L", 
+        "freq": 0.733333
+      }
+    ], 
+    "target": "GS_PER1"
+  }, 
+  {
+    "cellline": "LN229_CENTRAL_NERVOUS_SYSTEM", 
+    "mutations": [
+      {
+        "mut": "p.L184R", 
+        "freq": 0.190476
+      }
+    ], 
+    "target": "GS_BOP1"
+  }, 
+  {
+    "cellline": "HGC27_STOMACH", 
+    "mutations": [
+      {
+        "mut": "p.L212V", 
+        "freq": 0.412371
+      }
+    ], 
+    "target": "GS_BOP1"
+  }, 
+  {
+    "cellline": "NCIH1105_LUNG", 
+    "mutations": [
+      {
+        "mut": "p.P131H", 
+        "freq": 0.497537
+      }
+    ], 
+    "target": "GS_BOP1"
+  }, 
+  {
+    "cellline": "OSRC2_KIDNEY", 
+    "mutations": [
+      {
+        "mut": "p.L212V", 
+        "freq": 0.546392
+      }
+    ], 
+    "target": "GS_BOP1"
+  }, 
+  {
+    "cellline": "NCIH838_LUNG", 
+    "mutations": [
+      {
+        "mut": "p.S12I", 
+        "freq": 0.512281
+      }
+    ], 
+    "target": "GS_CEP350"
+  }, 
+  {
+    "cellline": "CORL23_LUNG", 
+    "mutations": [
+      {
+        "mut": "p.R636S", 
+        "freq": 0.180435
+      }
+    ], 
+    "target": "GS_SMARCA4"
+  }, 
+  {
+    "cellline": "LN382_CENTRAL_NERVOUS_SYSTEM", 
+    "mutations": [
+      {
+        "mut": "p.I1005M", 
+        "freq": 0.688442
+      }
+    ], 
+    "target": "GS_SMARCA4"
+  }, 
+  {
+    "cellline": "NCIH660_PROSTATE", 
+    "mutations": [
+      {
+        "mut": "p.E206G", 
+        "freq": 0.5
+      }
+    ], 
+    "target": "GS_SMARCA4"
+  }, 
+  {
+    "cellline": "HEC251_ENDOMETRIUM", 
+    "mutations": [
+      {
+        "mut": "p.R862H", 
+        "freq": 0.546667
+      }
+    ], 
+    "target": "GS_SMARCA4"
+  }, 
+  {
+    "cellline": "NCIH1048_LUNG", 
+    "mutations": [
+      {
+        "mut": "p.R560H", 
+        "freq": 0.512821
+      }
+    ], 
+    "target": "GS_SMARCA4"
+  }, 
+  {
+    "cellline": "NCIH1155_LUNG", 
+    "mutations": [
+      {
+        "mut": "p.R753H", 
+        "freq": 0.532609
+      }
+    ], 
+    "target": "GS_SMARCA4"
+  }, 
+  {
+    "cellline": "SCC4_UPPER_AERODIGESTIVE_TRACT", 
+    "mutations": [
+      {
+        "mut": "p.W190L", 
+        "freq": 0.269896
+      }
+    ], 
+    "target": "GS_SMARCA4"
+  }, 
+  {
+    "cellline": "SHP77_LUNG", 
+    "mutations": [
+      {
+        "mut": "p.R142L", 
+        "freq": 0.991031
+      }
+    ], 
+    "target": "GS_SMARCA4"
+  }, 
+  {
+    "cellline": "EW8_BONE", 
+    "mutations": [
+      {
+        "mut": "p.S504A", 
+        "freq": 0.214286
+      }
+    ], 
+    "target": "GS_TNRC6B"
+  }, 
+  {
+    "cellline": "HCC2218_BREAST", 
+    "mutations": [
+      {
+        "mut": "p.E1460K", 
+        "freq": 0.105691
+      }
+    ], 
+    "target": "GS_TNRC6B"
+  }, 
+  {
+    "cellline": "SF767_CENTRAL_NERVOUS_SYSTEM", 
+    "mutations": [
+      {
+        "mut": "p.R1003C", 
+        "freq": 0.578947
+      }
+    ], 
+    "target": "GS_TNRC6B"
+  }, 
+  {
+    "cellline": "SNU1105_CENTRAL_NERVOUS_SYSTEM", 
+    "mutations": [
+      {
+        "mut": "p.P1217L", 
+        "freq": 1.0
+      }
+    ], 
+    "target": "GS_TNRC6B"
+  }, 
+  {
+    "cellline": "TC71_BONE", 
+    "mutations": [
+      {
+        "mut": "p.Q267H", 
+        "freq": 1.0
+      }
+    ], 
+    "target": "GS_TNRC6B"
+  }, 
+  {
+    "cellline": "TOV21G_OVARY", 
+    "mutations": [
+      {
+        "mut": "p.V248A", 
+        "freq": 0.411765
+      }
+    ], 
+    "target": "GS_TNRC6B"
+  }, 
+  {
+    "cellline": "DMS53_LUNG", 
+    "mutations": [
+      {
+        "mut": "p.R422Q", 
+        "freq": 0.703704
+      }
+    ], 
+    "target": "GS_TNRC6B"
+  }, 
+  {
+    "cellline": "EN_ENDOMETRIUM", 
+    "mutations": [
+      {
+        "mut": "p.L1125V", 
+        "freq": 1.0
+      }
+    ], 
+    "target": "GS_TNRC6B"
+  }, 
+  {
+    "cellline": "HSC2_UPPER_AERODIGESTIVE_TRACT", 
+    "mutations": [
+      {
+        "mut": "p.R422Q", 
+        "freq": 0.3125
+      }, 
+      {
+        "mut": "p.P1217L", 
+        "freq": 0.416667
+      }
+    ], 
+    "target": "GS_TNRC6B"
+  }, 
+  {
+    "cellline": "KYSE140_OESOPHAGUS", 
+    "mutations": [
+      {
+        "mut": "p.N318S", 
+        "freq": 0.272727
+      }
+    ], 
+    "target": "GS_TNRC6B"
+  }, 
+  {
+    "cellline": "MDAPCA2B_PROSTATE", 
+    "mutations": [
+      {
+        "mut": "p.G338D", 
+        "freq": 0.541667
+      }
+    ], 
+    "target": "GS_TNRC6B"
+  }, 
+  {
+    "cellline": "MELJUSO_SKIN", 
+    "mutations": [
+      {
+        "mut": "p.M137I", 
+        "freq": 0.12
+      }, 
+      {
+        "mut": "p.S1372F", 
+        "freq": 0.204545
+      }
+    ], 
+    "target": "GS_TNRC6B"
+  }, 
+  {
+    "cellline": "MEWO_SKIN", 
+    "mutations": [
+      {
+        "mut": "p.S603L", 
+        "freq": 1.0
+      }
+    ], 
+    "target": "GS_TNRC6B"
+  }, 
+  {
+    "cellline": "SH4_SKIN", 
+    "mutations": [
+      {
+        "mut": "p.P1636L", 
+        "freq": 0.285714
+      }
+    ], 
+    "target": "GS_TNRC6B"
+  }, 
+  {
+    "cellline": "SNU349_KIDNEY", 
+    "mutations": [
+      {
+        "mut": "p.K387R", 
+        "freq": 0.416667
+      }
+    ], 
+    "target": "GS_TNRC6B"
+  }, 
+  {
+    "cellline": "SNU216_STOMACH", 
+    "mutations": [
+      {
+        "mut": "p.Y70C", 
+        "freq": 1.0
+      }
+    ], 
+    "target": "GS_GUCY1A2"
+  }, 
+  {
+    "cellline": "CAS1_CENTRAL_NERVOUS_SYSTEM", 
+    "mutations": [
+      {
+        "mut": "p.P1436L", 
+        "freq": 0.571429
+      }
+    ], 
+    "target": "GS_DOPEY1"
+  }, 
+  {
+    "cellline": "DBTRG05MG_CENTRAL_NERVOUS_SYSTEM", 
+    "mutations": [
+      {
+        "mut": "p.Y900S", 
+        "freq": 0.35
+      }
+    ], 
+    "target": "GS_DOPEY1"
+  }, 
+  {
+    "cellline": "EFO27_OVARY", 
+    "mutations": [
+      {
+        "mut": "p.R1284H", 
+        "freq": 0.46875
+      }
+    ], 
+    "target": "GS_DOPEY1"
+  }, 
+  {
+    "cellline": "GP2D_LARGE_INTESTINE", 
+    "mutations": [
+      {
+        "mut": "p.Q1747R", 
+        "freq": 0.548387
+      }
+    ], 
+    "target": "GS_DOPEY1"
+  }, 
+  {
+    "cellline": "IOMMLEE_CENTRAL_NERVOUS_SYSTEM", 
+    "mutations": [
+      {
+        "mut": "p.I2172N", 
+        "freq": 0.555556
+      }
+    ], 
+    "target": "GS_DOPEY1"
+  }, 
+  {
+    "cellline": "CAL27_UPPER_AERODIGESTIVE_TRACT", 
+    "mutations": [
+      {
+        "mut": "p.K2003N", 
+        "freq": 0.157895
+      }
+    ], 
+    "target": "GS_DOPEY1"
+  }, 
+  {
+    "cellline": "DU145_PROSTATE", 
+    "mutations": [
+      {
+        "mut": "p.T1832S", 
+        "freq": 0.589744
+      }
+    ], 
+    "target": "GS_DOPEY1"
+  }, 
+  {
+    "cellline": "ECC10_STOMACH", 
+    "mutations": [
+      {
+        "mut": "p.A595V", 
+        "freq": 0.666667
+      }
+    ], 
+    "target": "GS_DOPEY1"
+  }, 
+  {
+    "cellline": "HCC2429_LUNG", 
+    "mutations": [
+      {
+        "mut": "p.E22D", 
+        "freq": 0.461538
+      }
+    ], 
+    "target": "GS_DOPEY1"
+  }, 
+  {
+    "cellline": "HEC251_ENDOMETRIUM", 
+    "mutations": [
+      {
+        "mut": "p.L1867R", 
+        "freq": 0.3
+      }, 
+      {
+        "mut": "p.F2155L", 
+        "freq": 0.25
+      }
+    ], 
+    "target": "GS_DOPEY1"
+  }, 
+  {
+    "cellline": "IM95_STOMACH", 
+    "mutations": [
+      {
+        "mut": "p.E1086K", 
+        "freq": 0.362319
+      }, 
+      {
+        "mut": "p.R2233C", 
+        "freq": 0.410526
+      }
+    ], 
+    "target": "GS_DOPEY1"
+  }, 
+  {
+    "cellline": "KNS62_LUNG", 
+    "mutations": [
+      {
+        "mut": "p.Q2105P", 
+        "freq": 0.588235
+      }
+    ], 
+    "target": "GS_DOPEY1"
+  }, 
+  {
+    "cellline": "LCLC97TM1_LUNG", 
+    "mutations": [
+      {
+        "mut": "p.W2092F", 
+        "freq": 0.2
+      }
+    ], 
+    "target": "GS_DOPEY1"
+  }, 
+  {
+    "cellline": "LNCAPCLONEFGC_PROSTATE", 
+    "mutations": [
+      {
+        "mut": "p.V1758M", 
+        "freq": 0.622807
+      }, 
+      {
+        "mut": "p.R2055H", 
+        "freq": 0.494737
+      }
+    ], 
+    "target": "GS_DOPEY1"
+  }, 
+  {
+    "cellline": "LXF289_LUNG", 
+    "mutations": [
+      {
+        "mut": "p.Q1833E", 
+        "freq": 0.470588
+      }
+    ], 
+    "target": "GS_DOPEY1"
+  }, 
+  {
+    "cellline": "NCIH522_LUNG", 
+    "mutations": [
+      {
+        "mut": "p.Y1327C", 
+        "freq": 0.304348
+      }, 
+      {
+        "mut": "p.V1685F", 
+        "freq": 0.318182
+      }
+    ], 
+    "target": "GS_DOPEY1"
+  }, 
+  {
+    "cellline": "NUGC3_STOMACH", 
+    "mutations": [
+      {
+        "mut": "p.E913K", 
+        "freq": 1.0
+      }
+    ], 
+    "target": "GS_DOPEY1"
+  }, 
+  {
+    "cellline": "OC314_OVARY", 
+    "mutations": [
+      {
+        "mut": "p.L880F", 
+        "freq": 0.318182
+      }
+    ], 
+    "target": "GS_DOPEY1"
+  }, 
+  {
+    "cellline": "SW1271_LUNG", 
+    "mutations": [
+      {
+        "mut": "p.G1960V", 
+        "freq": 0.375
+      }
+    ], 
+    "target": "GS_DOPEY1"
+  }, 
+  {
+    "cellline": "UACC812_BREAST", 
+    "mutations": [
+      {
+        "mut": "p.T1832S", 
+        "freq": 0.545455
+      }
+    ], 
+    "target": "GS_DOPEY1"
+  }, 
+  {
+    "cellline": "22RV1_PROSTATE", 
+    "mutations": [
+      {
+        "mut": "p.910_911insQ", 
+        "freq": 0.25
+      }
+    ], 
+    "target": "GS_DENND4A"
+  }, 
+  {
+    "cellline": "EFO27_OVARY", 
+    "mutations": [
+      {
+        "mut": "p.R582W", 
+        "freq": 0.586207
+      }
+    ], 
+    "target": "GS_DENND4A"
+  }, 
+  {
+    "cellline": "GP2D_LARGE_INTESTINE", 
+    "mutations": [
+      {
+        "mut": "p.S466R", 
+        "freq": 0.437037
+      }
+    ], 
+    "target": "GS_DENND4A"
+  }, 
+  {
+    "cellline": "HCC2218_BREAST", 
+    "mutations": [
+      {
+        "mut": "p.R968Q", 
+        "freq": 0.387755
+      }
+    ], 
+    "target": "GS_DENND4A"
+  }, 
+  {
+    "cellline": "HEC1A_ENDOMETRIUM", 
+    "mutations": [
+      {
+        "mut": "p.A487S", 
+        "freq": 0.455782
+      }
+    ], 
+    "target": "GS_DENND4A"
+  }, 
+  {
+    "cellline": "KM12_LARGE_INTESTINE", 
+    "mutations": [
+      {
+        "mut": "p.G344D", 
+        "freq": 0.52027
+      }
+    ], 
+    "target": "GS_DENND4A"
+  }, 
+  {
+    "cellline": "OVISE_OVARY", 
+    "mutations": [
+      {
+        "mut": "p.R315Q", 
+        "freq": 0.563636
+      }
+    ], 
+    "target": "GS_DENND4A"
+  }, 
+  {
+    "cellline": "QGP1_PANCREAS", 
+    "mutations": [
+      {
+        "mut": "p.P514L", 
+        "freq": 0.106796
+      }
+    ], 
+    "target": "GS_DENND4A"
+  }, 
+  {
+    "cellline": "RKO_LARGE_INTESTINE", 
+    "mutations": [
+      {
+        "mut": "p.910_911insQ", 
+        "freq": 0.520833
+      }
+    ], 
+    "target": "GS_DENND4A"
+  }, 
+  {
+    "cellline": "SF172_CENTRAL_NERVOUS_SYSTEM", 
+    "mutations": [
+      {
+        "mut": "p.910_911insQ", 
+        "freq": 0.444444
+      }
+    ], 
+    "target": "GS_DENND4A"
+  }, 
+  {
+    "cellline": "DU145_PROSTATE", 
+    "mutations": [
+      {
+        "mut": "p.G1382C", 
+        "freq": 0.318182
+      }
+    ], 
+    "target": "GS_DENND4A"
+  }, 
+  {
+    "cellline": "HCC1428_BREAST", 
+    "mutations": [
+      {
+        "mut": "p.S953L", 
+        "freq": 0.189873
+      }
+    ], 
+    "target": "GS_DENND4A"
+  }, 
+  {
+    "cellline": "HEC251_ENDOMETRIUM", 
+    "mutations": [
+      {
+        "mut": "p.901_903QQQ>Q", 
+        "freq": 0.405172
+      }
+    ], 
+    "target": "GS_DENND4A"
+  }, 
+  {
+    "cellline": "HEC59_ENDOMETRIUM", 
+    "mutations": [
+      {
+        "mut": "p.S756L", 
+        "freq": 0.55102
+      }, 
+      {
+        "mut": "p.A410D", 
+        "freq": 0.460526
+      }
+    ], 
+    "target": "GS_DENND4A"
+  }, 
+  {
+    "cellline": "KATOIII_STOMACH", 
+    "mutations": [
+      {
+        "mut": "p.V15A", 
+        "freq": 0.285714
+      }
+    ], 
+    "target": "GS_DENND4A"
+  }, 
+  {
+    "cellline": "MDAMB157_BREAST", 
+    "mutations": [
+      {
+        "mut": "p.910_911insQ", 
+        "freq": 0.833333
+      }
+    ], 
+    "target": "GS_DENND4A"
+  }, 
+  {
+    "cellline": "NCIH1155_LUNG", 
+    "mutations": [
+      {
+        "mut": "p.R1431H", 
+        "freq": 0.432039
+      }
+    ], 
+    "target": "GS_DENND4A"
+  }, 
+  {
+    "cellline": "NCIH1373_LUNG", 
+    "mutations": [
+      {
+        "mut": "p.910_911insQ", 
+        "freq": 0.493056
+      }
+    ], 
+    "target": "GS_DENND4A"
+  }, 
+  {
+    "cellline": "NCIH2009_LUNG", 
+    "mutations": [
+      {
+        "mut": "p.R42W", 
+        "freq": 0.516129
+      }
+    ], 
+    "target": "GS_DENND4A"
+  }, 
+  {
+    "cellline": "PECAPJ49_UPPER_AERODIGESTIVE_TRACT", 
+    "mutations": [
+      {
+        "mut": "p.R1257W", 
+        "freq": 1.0
+      }
+    ], 
+    "target": "GS_DENND4A"
+  }, 
+  {
+    "cellline": "PLCPRF5_LIVER", 
+    "mutations": [
+      {
+        "mut": "p.910_911insQ", 
+        "freq": 0.251282
+      }
+    ], 
+    "target": "GS_DENND4A"
+  }, 
+  {
+    "cellline": "SW620_LARGE_INTESTINE", 
+    "mutations": [
+      {
+        "mut": "p.P1314T", 
+        "freq": 0.421429
+      }
+    ], 
+    "target": "GS_DENND4A"
+  }, 
+  {
+    "cellline": "TE4_OESOPHAGUS", 
+    "mutations": [
+      {
+        "mut": "p.E1286Q", 
+        "freq": 0.444444
+      }
+    ], 
+    "target": "GS_DENND4A"
+  }, 
+  {
+    "cellline": "WM1799_SKIN", 
+    "mutations": [
+      {
+        "mut": "p.P685L", 
+        "freq": 0.336207
+      }
+    ], 
+    "target": "GS_DENND4A"
+  }, 
+  {
+    "cellline": "A172_CENTRAL_NERVOUS_SYSTEM", 
+    "mutations": [
+      {
+        "mut": "p.C1136S", 
+        "freq": 0.247222
+      }
+    ], 
+    "target": "GS_PHLDB1"
+  }, 
+  {
+    "cellline": "LK2_LUNG", 
+    "mutations": [
+      {
+        "mut": "p.R735C", 
+        "freq": 0.472222
+      }
+    ], 
+    "target": "GS_PHLDB1"
+  }, 
+  {
+    "cellline": "LN340_CENTRAL_NERVOUS_SYSTEM", 
+    "mutations": [
+      {
+        "mut": "p.Q1192H", 
+        "freq": 0.163043
+      }
+    ], 
+    "target": "GS_PHLDB1"
+  }, 
+  {
+    "cellline": "LN443_CENTRAL_NERVOUS_SYSTEM", 
+    "mutations": [
+      {
+        "mut": "p.E602K", 
+        "freq": 0.833333
+      }
+    ], 
+    "target": "GS_PHLDB1"
+  }, 
+  {
+    "cellline": "BICR56_UPPER_AERODIGESTIVE_TRACT", 
+    "mutations": [
+      {
+        "mut": "p.H21Q", 
+        "freq": 0.646465
+      }
+    ], 
+    "target": "GS_PHLDB1"
+  }, 
+  {
+    "cellline": "CHAGOK1_LUNG", 
+    "mutations": [
+      {
+        "mut": "p.E1232A", 
+        "freq": 0.296296
+      }
+    ], 
+    "target": "GS_PHLDB1"
+  }, 
+  {
+    "cellline": "HCC1806_BREAST", 
+    "mutations": [
+      {
+        "mut": "p.N52I", 
+        "freq": 0.295455
+      }
+    ], 
+    "target": "GS_PHLDB1"
+  }, 
+  {
+    "cellline": "HEC251_ENDOMETRIUM", 
+    "mutations": [
+      {
+        "mut": "p.L804I", 
+        "freq": 0.388889
+      }, 
+      {
+        "mut": "p.E1054K", 
+        "freq": 0.416667
+      }, 
+      {
+        "mut": "p.R1222I", 
+        "freq": 0.75
+      }
+    ], 
+    "target": "GS_PHLDB1"
+  }, 
+  {
+    "cellline": "HEC59_ENDOMETRIUM", 
+    "mutations": [
+      {
+        "mut": "p.R254L", 
+        "freq": 0.193548
+      }
+    ], 
+    "target": "GS_PHLDB1"
+  }, 
+  {
+    "cellline": "MDAMB435S_SKIN", 
+    "mutations": [
+      {
+        "mut": "p.S175L", 
+        "freq": 0.252427
+      }
+    ], 
+    "target": "GS_PHLDB1"
+  }, 
+  {
+    "cellline": "NCIH1693_LUNG", 
+    "mutations": [
+      {
+        "mut": "p.R620I", 
+        "freq": 0.995851
+      }
+    ], 
+    "target": "GS_PHLDB1"
+  }, 
+  {
+    "cellline": "RL952_ENDOMETRIUM", 
+    "mutations": [
+      {
+        "mut": "p.I775V", 
+        "freq": 0.8
+      }
+    ], 
+    "target": "GS_PHLDB1"
+  }, 
+  {
+    "cellline": "BXPC3_PANCREAS", 
+    "mutations": [
+      {
+        "mut": "p.A61V", 
+        "freq": 0.266667
+      }
+    ], 
+    "target": "GS_DAB2IP"
+  }, 
+  {
+    "cellline": "U251MG_CENTRAL_NERVOUS_SYSTEM", 
+    "mutations": [
+      {
+        "mut": "p.122_123insGG", 
+        "freq": 0.294118
+      }
+    ], 
+    "target": "GS_DAB2IP"
+  }, 
+  {
+    "cellline": "NCIH727_LUNG", 
+    "mutations": [
+      {
+        "mut": "p.P390R", 
+        "freq": 1.0
+      }
+    ], 
+    "target": "GS_DAB2IP"
+  }, 
+  {
+    "cellline": "TE6_OESOPHAGUS", 
+    "mutations": [
+      {
+        "mut": "p.L388V", 
+        "freq": 1.0
+      }
+    ], 
+    "target": "GS_DAB2IP"
+  }, 
+  {
+    "cellline": "CFPAC1_PANCREAS", 
+    "mutations": [
+      {
+        "mut": "p.E603*", 
+        "freq": 0.5
+      }
+    ], 
+    "target": "GS_NEK1"
+  }, 
+  {
+    "cellline": "KNS81_CENTRAL_NERVOUS_SYSTEM", 
+    "mutations": [
+      {
+        "mut": "p.D51del", 
+        "freq": 0.944444
+      }
+    ], 
+    "target": "GS_ASPM"
+  }
+]
