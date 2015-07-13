@@ -13,7 +13,7 @@ function getStdDev(values) { //sample stddev
 	for (var i = 0; i < values.length; i++) {
 		sigmaMeanDiffSquared += Math.pow(values[i] - mean, 2);
 	};
-	return Math.pow(sigmaMeanDiffSquared/(values.length - 1),0.5);
+	return Math.pow(sigmaMeanDiffSquared/(values.length),0.5);
 }
 
 function zScore(values) {
