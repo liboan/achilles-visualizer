@@ -8,14 +8,12 @@
 } ());
 
 function getData() {
-    /*  
-        IMPORTANT!!!!
-        At the moment, it is assumed that a list of mutations is included in the JSON file (data.mutations)
-        If the mutations are in a separate file, the program will need to be changed!
-    */
 
     $.getJSON("/json", function (data) {
-        setup(data);
+        $.getJSON("/mut", function (mut) {
+            data["mutations"] = mut;
+            setup(data);
+        });
     });
 }
 
@@ -165,11 +163,14 @@ function setup(data) {
             }
 
             updateGraphTooltip(graph, event.x);
+
         });
 
+
         $(".graph").on("mouseout", function () {
-            $("#tooltip").toggle();
+            //updateGraphTooltip(graph, event.x);
         });
+
 
 
         //Scatter Mouseover Stuff: See code for circle creation in updateScatter()
@@ -424,7 +425,7 @@ function setup(data) {
         uiFields.append("input")
             .attr("class", "detailButton")
             .attr("type","button")
-            .attr("value","Show/hide scatter plot or mutation plot");
+            .attr("value","Show/hide scatter or box plot");
 
         //////Graphs//////
 
@@ -582,6 +583,7 @@ function setup(data) {
                 .data(indices) //bind indices and use them to access pertinent values from data object
                 .enter()
                 .append("rect")
+                .attr("class","data") //for mouseover
                 .attr("fill", "red")
                 .attr("x", function (d, i) {
                     return i * barWidth + graphLeftPadding;
@@ -630,6 +632,7 @@ function setup(data) {
                 .data(indices) //bind indices and use them to access pertinent values from data object
                 .enter()
                 .append("rect")
+                .attr("class", "data")
                 .attr("x", function (d, i) {
                     return i * barWidth + graphLeftPadding;
                 })
@@ -646,15 +649,18 @@ function setup(data) {
                     else return Math.ceil(Math.abs(y(0) - y(featureOutput[d])));
                 })
                 .attr("fill", function (d) {
+                    var color;
                     if (data.features[id].zScores[d] < -3) {
-                        return "limegreen";
+                        color = "limegreen";
                     }
                     else if (data.features[id].zScores[d] > 3) {
-                        return "crimson";
+                        color = "crimson";
                     }
                     else {
-                        return "lightgray";
+                        color = "lightgray";
                     }
+                    d3.select(this).attr("defaultFill", color); //dummy attribute for future reference
+                    return color;
                 });
         }
 
@@ -829,6 +835,8 @@ function setup(data) {
                 return a[0] - b[0];
             });
         };
+
+        console.log(buckets);
 
         var plot = d3.select("#f" + id + type);
 
@@ -1079,31 +1087,30 @@ function setup(data) {
             });
     }
 
-    function updateGraphTooltip(graph, xPos) { //Updates the main graph tooltip whenever mouse position shifts.
+    function updateGraphTooltip(graph, xPos) { //Updates the main graph tooltip whenever mouse position shifts, also darkens the appropriate rect
         //graph = "target" or index of feature, xPos = mouse x coordinate 
         var index;
         var graphElement;
         var line1, line2, line3; //three lines to be printed, depends on what graph
 
-
-
         if (graph === "target") {
             graphElement = $("#targetGraph");
             index = Math.floor((xPos - graphElement.offset().left - graphLeftPadding) / barWidth); //pixels to right of svg / # of rects 
-            // console.log(graph + " " + index + " " + data.cellline[index] + " " + data.predictions[indices[index]] + " " + data.target[indices[index]]);
-            line1 = "Cell Line: " + data.cellline[indices[index]];            
-            line2 = "Prediction: " + (data.predictions[indices[index]]).toFixed(4);
-            line3 = "Target: " + (data.target[indices[index]]).toFixed(4);
+            if (index >= 0) {
+                line1 = "Cell Line: " + data.cellline[indices[index]];            
+                line2 = "Prediction: " + (data.predictions[indices[index]]).toFixed(4);
+                line3 = "Target: " + (data.target[indices[index]]).toFixed(4);
+            }
         }
         else {
             graphElement = $("#f" + graph + "Graph");
             index = Math.floor((xPos - graphElement.offset().left - graphLeftPadding) / barWidth);
-            // console.log(graph + " " + index + " " + data.cellline[indices[index]] + " " + data.features[graph].zScores[indices[index]]);
-            line1 = "Cell Line: " + data.cellline[indices[index]];
-
-            if (data.features[graph].values[indices[index]] !== null) line2 = "Value: " + (data.features[graph].values[indices[index]]).toFixed(4);
-            else line2 = "Value: null";
-            line3 = "Std. Dev.: " + (data.features[graph].zScores[indices[index]]).toFixed(4);
+            if (index >= 0) {
+                line1 = "Cell Line: " + data.cellline[indices[index]];
+                if (data.features[graph].values[indices[index]] !== null) line2 = "Value: " + (data.features[graph].values[indices[index]]).toFixed(4);
+                else line2 = "Value: null";
+                line3 = "Std. Dev.: " + (data.features[graph].zScores[indices[index]]).toFixed(4);
+            }
         }
 
         //console.log(line1 + line2 + line3)
@@ -1112,7 +1119,7 @@ function setup(data) {
 
         var tooltip = d3.select("#tooltip")
             .style("display",function () {
-                if (xPos > graphLeftPadding) return "block"; //only have the tooltip show up when it is on graph bars
+                if ((xPos - graphElement.offset().left) > graphLeftPadding) return "block"; //only have the tooltip show up when it is on graph bars
                 else return "none";
             })
             .style("left",(xPos-60) + "px")
@@ -1129,6 +1136,19 @@ function setup(data) {
             .style("font","12px Arial")
             .text(function (d) {
                 return d;
+            });
+
+        //darken moused-over rectangle
+        d3.select(graphElement.get()[0]) //get the data rectangles inside the graph element
+            .selectAll(".data")
+            .each(function (d, i) {
+                if (i === index) {
+                    d3.select(this).style("fill", "black");
+                }
+                else {
+                    d3.select(this).style("fill", $(this).css("defaultFill"));     
+
+                }
             });
     }
 

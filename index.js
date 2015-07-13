@@ -15,6 +15,11 @@ app.get("/json", function (req, res) {
 	console.log("Request for json");
 });
 
+app.get("/mut", function (req, res) {
+	res.sendFile(__dirname + "/GS_SMARCA2_mut.json");
+	console.log("Request for mut json");
+});
+
 app.get("/mvc", function (req, res) {
 	res.sendFile(__dirname + "/test.html");
 });
