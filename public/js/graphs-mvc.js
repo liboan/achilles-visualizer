@@ -168,10 +168,8 @@ function setup(data) {
 
 
         $(".graph").on("mouseout", function () {
-            //updateGraphTooltip(graph, event.x);
+            $("#tooltip").css("display","none");
         });
-
-
 
         //Scatter Mouseover Stuff: See code for circle creation in updateScatter()
 
@@ -650,16 +648,16 @@ function setup(data) {
                 })
                 .attr("fill", function (d) {
                     var color;
-                    if (data.features[id].zScores[d] < -3) {
+                    if (data.features[id].zScores[d] < -2) {
                         color = "limegreen";
                     }
-                    else if (data.features[id].zScores[d] > 3) {
+                    else if (data.features[id].zScores[d] > 2) {
                         color = "crimson";
                     }
                     else {
                         color = "lightgray";
                     }
-                    d3.select(this).attr("defaultFill", color); //dummy attribute for future reference
+                    d3.select(this).text(color);
                     return color;
                 });
         }
@@ -1162,31 +1160,22 @@ function setup(data) {
 
         var bucketDetails = []; //array of objects with celllines and mutation info if any
 
-        /*
-            How to deal with mutation details? Most cell lines have mutations hitting genes other than SMARCA2
-
-        */
-
-
-
         for (var i = 0; i < bucketMembers.length; i++) {
-            var search = $.grep(data.mutations, function (element) { //search mutation array by property cellline
-                return element.target === geneName;
-            });
+            var detailObject = { //create an object with name only first
+                name: bucketMembers[i],
+                mutations: []
+            };
 
-            console.log(search.length);
+            for (var j = 0; j < data.mutations.length; j++) {
+                if (bucketMembers[i] === data.mutations[j].cellline && featureName === data.mutations[j].feature) {
+                    detailObject.mutations = data.mutations[j].mutations; //if we find mutations, add them to object
+                }
+            }
+            bucketDetails.push(detailObject); //push no matter what
 
-            if (search.length == 0) { //if no search results
-                bucketDetails.push({
-                    cellline: x,
-                    mutations: []
-                });
-            }
-            else {
-                bucketDetails.concat(search);
-                console.log(search);
-            }
         };
+
+        console.log(bucketDetails);
 
         var detailDiv = $("#" + feature + " .details");
 
@@ -1214,7 +1203,7 @@ function setup(data) {
         tooltip.append("div")
             .attr("id", "bucketTitle")
             .style("text-align", "center")
-            .style("font", "13px Arial")
+            .style("font", "bold 14px Arial")
             .text(function () {
                 return boxIndex + " Muts (" + bucketMembers.length + " lines)";
             })
@@ -1228,7 +1217,7 @@ function setup(data) {
             .data(["Min","1Q", "Med", "3Q", "Max"])
             .enter()
             .append("td")
-            .style("font", "11px Arial")
+            .style("font", "13px Arial")
             .style("text-align", "center")
             .text(function (d) {
                 return d;
@@ -1239,23 +1228,60 @@ function setup(data) {
             .data(bucketNumbers)
             .enter()
             .append("td")
-            .style("font", "11px Arial")
+            .style("font", "13px Arial")
             .style("text-align", "center")
             .text(function (d) {
-                return d.toFixed(4);
+                return d.toFixed(3);
             });  
 
-        tooltip.selectAll("div .bucketMembers")
-            .data(bucketMembers)
+        tooltip.append("div")
+            .text("Click an entry to show mutation areas")
+            .style("font", "10px Arial")
+            .style("text-align", "center");
+
+
+        var bucketMemberDivs = tooltip.selectAll("div .bucketMembers")
+            .data(bucketDetails)
             .enter()
             .append("div")
-            .attr("class", "bucketMembers")
+            .attr("class", "bucketMembers");
+
+        bucketMemberDivs.append("div")
             .style("word-wrap","break-word")
-            .style("margin-bottom", "2px")            
-            .style("font", "10px Arial")
-            .text(function (d) {
-                return d;
+            .style("margin-top", "4px")            
+            .style("font", "12px Arial")
+            .text(function (d, i) {
+                return d.name;                    
+            })
+            .on("mouseover", function () {
+                d3.select(this).style("background-color","lightgray");
+            })
+            .on("mouseout", function () {
+                d3.select(this).style("background-color","white");
+            })            
+            .on("click", function () {
+                $(this).parent().find(".mutations").toggle();
             });
+
+        bucketMemberDivs.each(function (d, i) { //bind mutation array to each bucket member div
+            d3.select(this)
+                .selectAll("div .mutations")
+                .data(d.mutations)
+                .enter()
+                .append("div")
+                .attr("class", "mutations")
+                .style("font","11px Arial")
+                .style("margin-left", "10px")
+                .style("margin-top", "2px")
+                .style("display","none")
+                .text(function (d, i) {
+                    return d.mut;
+                });                
+        });
+
+        console.log(bucketMemberDivs);
+
+
     }
 
     function updateScatterTooltip(graph, cellline) { //Updates the scatterplot tooltip whenever mouse is over a circle
