@@ -47,6 +47,7 @@ function setup(data) {
 
     var zoom = 1;
     var zScoreState = false;
+    var backgroundState = false;
 
   
 
@@ -111,7 +112,19 @@ function setup(data) {
 
         for (var i = 0; i < data.features.length; i++) {
             updateGraph(i);
+            updateScatter(i);
         };          
+    }
+
+    function toggleBackground () {
+        backgroundState = !backgroundState
+        if (backgroundState) $("#background").val("Hide lineage colors");
+        else $("#background").val("Show lineage colors");
+        updateGraph("target");
+        for (var i = 0; i < data.features.length; i++) {
+            updateGraph(i);
+        }; 
+
     }
 
     function updateZoom(change) {
@@ -137,6 +150,8 @@ function setup(data) {
         $("#filter").change(function () {
             filter($("#filter option:selected").text());
         });
+
+        $("#background").click(toggleBackground);
 
         $("#sortL").click(function () {
             return sort(0);
@@ -168,6 +183,7 @@ function setup(data) {
 
 
         $(".graph").on("mouseout", function () {
+            $(".shadow").attr("fill","none");
             $("#tooltip").css("display","none");
         });
 
@@ -213,11 +229,14 @@ function setup(data) {
     var graphHeight = 60;
     var leftWidth = 260;
     var graphLeftPadding = 40;
+    var graphTopPadding = 5;
     var barWidth;
     var scatterHeight = 500; //Scatter dimensions also used for box plots.
     var scatterWidth = 500;
     var scatterLeftPadding = 50;
     var scatterTopPadding = 50;
+
+    var filterOptions;
 
     function initWindow() {
         d3.select("body")
@@ -282,7 +301,7 @@ function setup(data) {
         //////Main UI stuff//////
 
         //get filtering options. 
-        var filterOptions = [""];
+        filterOptions = [""];
         for (var i = 0; i < data.cellline.length; i++) {
             entry = data.cellline[i];
             option = entry.substring(entry.indexOf("_") + 1);
@@ -341,6 +360,12 @@ function setup(data) {
             .text(function (d) {
                 return d;
             });
+
+        filterDiv.append("input")
+            .attr("type", "button")
+            .attr("id", "background")
+            .attr("value", "Show lineage colors")
+            .style("margin-left", "4px");
 
         var sortDiv = mainUI.append("div")
             .style("display", "inline-block")
@@ -515,7 +540,7 @@ function setup(data) {
         var featureOutput; //control bar height, values or z-scores. FEATURES ONLY!
 
         if (id !== "target") {
-            if (zScoreState) {
+            if (zScoreState && !(/^.MUT/.exec(data.features[id].name))) {
                 featureOutput = data.features[id].zScores;
             }
             else {
@@ -558,31 +583,109 @@ function setup(data) {
 
         // wrapWindow.style("width", Math.max(graphWidth + 500, 1020) + "px" );
 
-        var y = d3.scale.linear() //set up scale
-            .domain([min,max])
-            .range([graphHeight, 0]);
+        var y;
 
-        var yAxis = d3.svg.axis() //set up y-axis
-            .scale(y)
-            .orient("left")
-            .ticks(5);
+        if (id === "target" || !(/^.MUT/.exec(data.features[id].name))) { //only add z-score label & values on y-axis if not mutation
+            y = d3.scale.linear() //set up scale
+                .domain([min,max])
+                .range([graphHeight - graphTopPadding, graphTopPadding]);
 
-        graph.append("g") //add axis to svg
-            .attr("transform", "translate(" + (graphLeftPadding-1) + ",0)")
-            .call(yAxis)
-            .selectAll("path")
-            .style("stroke-width", "1px")
-            .style("stroke","black")
-            .style("fill","none");
+            var yAxis = d3.svg.axis() //set up y-axis
+                .scale(y)
+                .orient("left")
+                .ticks(5);
 
+            graph.append("g") //add axis to svg
+                .attr("transform", "translate(" + (graphLeftPadding-1) + ",0)")
+                .call(yAxis)
+                .selectAll("path")
+                .style("stroke-width", "1px")
+                .style("stroke","black")
+                .style("fill","none");
+
+            graph.append("text") //label
+                .text(function () {
+                    if (zScoreState) return "z-score";
+                    else return "value";
+                })
+                .attr("text-anchor","middle")
+                .attr("x", graphLeftPadding - 28)
+                .attr("y", graphHeight/2)
+                .attr("transform", "rotate(270 " + (graphLeftPadding - 28) + "," + (graphHeight/2) + ")")
+                .style("font-family", "Arial")
+                .style("font-size", "10px");
+        }
+        else { //add different y-axis and label for mutations
+            y = d3.scale.linear() //set up scale
+                .domain([0,2]) //all mutation values are b/w 0 and 2
+                .range([graphHeight-graphTopPadding, graphTopPadding]);
+
+            var yAxis = d3.svg.axis() //set up y-axis
+                .scale(y)
+                .orient("left")
+                .tickValues([0,1,2]);
+
+            graph.append("g") //add axis to svg
+                .attr("transform", "translate(" + (graphLeftPadding-1) + ",0)")
+                .call(yAxis)
+                .selectAll("path")
+                .style("stroke-width", "1px")
+                .style("stroke","black")
+                .style("fill","none");
+
+            graph.append("text") //label
+                .text("Mut. Alleles")
+                .attr("text-anchor","middle")
+                .attr("x", graphLeftPadding - 28)
+                .attr("y", graphHeight/2)
+                .attr("transform", "rotate(270 " + (graphLeftPadding - 28) + "," + (graphHeight/2) + ")")
+                .style("font-family", "Arial")
+                .style("font-size", "10px");                
+        }
+
+        var backgroundColors = ["burlywood", "darkolivegreen", "darkturquoise", "springgreen", "salmon", "yellowgreen", "plum", "navy",
+                            "chartreuse", "chocolate", "khaki", "lightcoral", "olive", "firebrick", "teal", "yellow", "tan",
+                            "saddlebrown", "violetred", "goldenrod", "darkgreen"];
+
+        if (backgroundState) {
+            graph.selectAll("rect .background") //add background color depending on origin
+                .data(indices)
+                .enter()
+                .append("rect")
+                .attr("class","background")
+                .attr("x", function (d, i) {
+                    return i * barWidth + graphLeftPadding;         
+                })
+                .attr("width", function () {
+                    return barWidth;
+                })
+                .attr("y", function () {
+                    return graphTopPadding;
+                })
+                .attr("height", function () {
+                    return graphHeight - 2 * graphTopPadding;
+                })
+                .attr("fill-opacity", 0.2)
+                .attr("fill", function (d) {
+                    var celllineName = data.cellline[d];
+                    for (var i = 1; i < filterOptions.length; i++) { //skip the first, empty option
+                        if (celllineName.indexOf(filterOptions[i]) !== -1) {
+                            return backgroundColors[i];
+                        }
+                    }
+                });
+        }
 
         if (id === "target") { 
-            graph.selectAll("rect")
+            graph.selectAll("rect .data")
                 .data(indices) //bind indices and use them to access pertinent values from data object
                 .enter()
                 .append("rect")
                 .attr("class","data") //for mouseover
-                .attr("fill", "red")
+                .attr("fill", function (d) {
+                    if (data.target[d] < -2) return "red";
+                    else return "gray";
+                })
                 .attr("x", function (d, i) {
                     return i * barWidth + graphLeftPadding;
                 })
@@ -613,20 +716,7 @@ function setup(data) {
 
         }
         else {
-            graph.append("text") //label
-                .text(function () {
-                    if (zScoreState) return "z-score";
-                    else return "value";
-                })
-                .attr("text-anchor","middle")
-                .attr("x", graphLeftPadding - 28)
-                .attr("y", graphHeight/2)
-                .attr("transform", "rotate(270 " + (graphLeftPadding - 28) + "," + (graphHeight/2) + ")")
-                .style("font-family", "Arial")
-                .style("font-size", "10px");
-
-
-            graph.selectAll("rect")
+            graph.selectAll("rect .data")
                 .data(indices) //bind indices and use them to access pertinent values from data object
                 .enter()
                 .append("rect")
@@ -638,7 +728,7 @@ function setup(data) {
                     return barWidth;
                 })
                 .attr("y", function (d) {
-                    if (featureOutput[d] == 0) return graphHeight - 1; //draw 0 values, but not null values                    
+                    if (featureOutput[d] == 0) return y(0) - 1; //draw 0 values, but not null values                    
                     return Math.min(y(Math.max(0, featureOutput[d])), 59);
                 })
                 .attr("height", function (d) {
@@ -655,12 +745,19 @@ function setup(data) {
                         color = "crimson";
                     }
                     else {
-                        color = "lightgray";
+                        color = "gray";
                     }
                     d3.select(this).text(color);
                     return color;
                 });
         }
+
+        graph.append("rect") //mouseover rectangle
+            .attr("class","shadow")
+            .attr("y",0)
+            .attr("height",graphHeight)
+            .attr("fill","none")
+            .attr("fill-opacity","0.3")
 
         graph.append("rect")
             .attr("class","mouseTrap") //detects mouse events, b/c svg window itself cannot
@@ -689,10 +786,18 @@ function setup(data) {
         var yMin = Infinity, yMax = -Infinity;
 
         var output; //depending on type, either data.predictions or data.target. Makes stuff simpler.
+        var input; //either z-score or feature value
+
+        if (zScoreState) {
+            input = data.features[id].zScores;
+        }
+        else {
+            input = data.features[id].values;
+        }
 
         for (var i = 0; i < indices.length; i++) {
-            xMin = Math.min(xMin, data.features[id].values[indices[i]]);
-            xMax = Math.max(xMax, data.features[id].values[indices[i]]);
+            xMin = Math.min(xMin, input[indices[i]]);
+            xMax = Math.max(xMax, input[indices[i]]);
             yMin = Math.min(yMin, data.predictions[indices[i]], data.target[indices[i]]);
             yMax = Math.max(yMax, data.predictions[indices[i]], data.target[indices[i]]);
         };
@@ -744,7 +849,7 @@ function setup(data) {
             .selectAll("path")
             .style("stroke-width", "1px")
             .style("stroke","black")
-            .style("fill","none");
+            .style("fill","none");         
 
         scatter.selectAll("circle")
             .data(indices)
@@ -752,33 +857,60 @@ function setup(data) {
             .append("circle")
             .attr("r", 3)
             .attr("cx", function (d) {
-                return x(data.features[id].values[d]);
+                return x(input[d]);
             })
             .attr("cy", function (d) {
                 return y(output[d]);
             })
-            .style("fill", function () {
-                switch (type) {
-                    case "p": 
-                        return "darkgreen";
-                    case "t":
-                        return "red";
-                }
-            })
+            .style("fill", "blue")
             .on("mouseover", function (d) {
                 //console.log($(scatter[0]).attr("id") + " " + data.cellline[d] + " " + data.features[id].values[d] + " " + output[d]);
                 updateScatterTooltip($(scatter[0]).attr("id"), data.cellline[d]);
+                scatter.select(".mouseLineX")
+                    .attr("stroke","black")
+                    .attr("y1", y(output[d]))
+                    .attr("y2", y(output[d]));
+
+                scatter.select(".mouseLineY")
+                    .attr("stroke","black")
+                    .attr("x1", x(input[d]))
+                    .attr("x2", x(input[d]));
             })
             .on("mouseout", function () {
                 $("#tooltip").toggle();
+                scatter.select(".mouseLineX")
+                    .attr("stroke","none");
+
+                scatter.select(".mouseLineY")
+                    .attr("stroke","none")
             });
+
+        scatter.append("line") //mouseover XY lines
+            .attr("class", "mouseLineX")
+            .attr("x1", scatterLeftPadding)
+            .attr("y1", 0)
+            .attr("x2", (scatterWidth - scatterLeftPadding))
+            .attr("y2", 500)
+            .attr("stroke", "none");
+
+        scatter.append("line")
+            .attr("class", "mouseLineY")
+            .attr("x1", 0)
+            .attr("y1", scatterLeftPadding)
+            .attr("x2", 500)
+            .attr("y2", (scatterWidth - scatterLeftPadding))
+            .attr("stroke", "none");   
+
 
         scatter.append("text") //x-axis label
             .attr("x", scatterWidth/2)
             .attr("y", scatterHeight - scatterTopPadding + 32)
             .style("font", "14px Arial")
             .attr("text-anchor", "middle")
-            .text("Feature Value");
+            .text(function () {
+                if (zScoreState) return data.features[id].name + " z-scores";
+                else return data.features[id].name + " Values";
+            });
 
         scatter.append("text") //y-axis label
             .attr("x", scatterLeftPadding - 30)
@@ -789,9 +921,9 @@ function setup(data) {
             .text(function () {
                 switch (type) {
                     case "p": 
-                        return "Prediction Value";
+                        return "Predicted *gene name* Dependency";
                     case "t":
-                        return "Target Value";
+                        return "Target *gene name* Dependency";
                 }
             });         
     }
@@ -834,8 +966,6 @@ function setup(data) {
             });
         };
 
-        console.log(buckets);
-
         var plot = d3.select("#f" + id + type);
 
         plot.selectAll("*").remove();
@@ -858,7 +988,7 @@ function setup(data) {
             .style("fill","none");
 
         var x = d3.scale.ordinal() //set up scale
-            .domain([0, 1, 2])
+            .domain(["None", "Heterozygous", "Homozygous"])
             .rangeRoundBands([scatterLeftPadding, scatterWidth - scatterLeftPadding],1)
 
         var xAxis = d3.svg.axis() //set up x-axis
@@ -882,9 +1012,9 @@ function setup(data) {
             .text(function () {
                 switch (type) {
                     case "p": 
-                        return "Prediction Value";
+                        return "Predicted *gene name* Dependency";
                     case "t":
-                        return "Target Value";
+                        return "Target *gene name* Dependency";
                 }
             });     
 
@@ -893,7 +1023,9 @@ function setup(data) {
             .attr("y", scatterHeight - scatterTopPadding + 32)
             .style("font", "14px Arial")
             .attr("text-anchor", "middle")
-            .text("Feature Mutation Frequency");       
+            .text(function () {
+                return "Mutation in " + data.features[id].name;
+            });       
 
         var boxes = plot.selectAll("g .boxPlot")
             .data(buckets)
@@ -920,7 +1052,7 @@ function setup(data) {
             .attr("height", function (d) {
                 return y(d3.quantile(getElement(d,0), 0.25)) - y(d3.quantile(getElement(d,0), 0.75));
             })
-            .style("stroke", "black")
+            .style("stroke", "blue")
             .style("fill", "none");
 
         boxes.append("line") //max line
@@ -936,14 +1068,7 @@ function setup(data) {
             .attr("y2", function (d) {
                 return y(d3.max(getElement(d,0)));
             })
-            .style("stroke", function () {
-                switch (type) {
-                    case "p": 
-                        return "darkgreen";
-                    case "t":
-                        return "red";
-                }
-            })
+            .style("stroke", "blue")
             .style("stroke-width", "2px");
 
         boxes.append("line") //min line
@@ -959,14 +1084,7 @@ function setup(data) {
             .attr("y2", function (d) {
                 return y(d3.min(getElement(d,0)));
             })
-            .style("stroke", function () {
-                switch (type) {
-                    case "p": 
-                        return "darkgreen";
-                    case "t":
-                        return "red";
-                }
-            })            
+            .style("stroke","blue")            
             .style("stroke-width", "2px");   
 
         boxes.append("line") //median line
@@ -982,14 +1100,7 @@ function setup(data) {
             .attr("y2", function (d) {
                 return y(d3.median(getElement(d,0)));
             })
-            .style("stroke", function () {
-                switch (type) {
-                    case "p": 
-                        return "darkgreen";
-                    case "t":
-                        return "red";
-                }
-            })
+            .style("stroke", "blue")
             .style("stroke-width", "2px");
 
         boxes.append("line") //top whisker             
@@ -1005,14 +1116,7 @@ function setup(data) {
             .attr("y2", function (d) {
                 return y(d3.quantile(getElement(d,0), 0.75));
             })
-            .style("stroke", function () {
-                switch (type) {
-                    case "p": 
-                        return "darkgreen";
-                    case "t":
-                        return "red";
-                }
-            })
+            .style("stroke", "blue")
             .style("stroke-width", "1px");
 
         boxes.append("line") //bottom whisker             
@@ -1028,14 +1132,7 @@ function setup(data) {
             .attr("y2", function (d) {
                 return y(d3.quantile(getElement(d,0), 0.25));
             })
-            .style("stroke", function () {
-                switch (type) {
-                    case "p": 
-                        return "darkgreen";
-                    case "t":
-                        return "red";
-                }
-            })
+            .style("stroke", "blue")
             .style("stroke-width", "1px");
 
         boxes.append("rect")
@@ -1107,7 +1204,7 @@ function setup(data) {
                 line1 = "Cell Line: " + data.cellline[indices[index]];
                 if (data.features[graph].values[indices[index]] !== null) line2 = "Value: " + (data.features[graph].values[indices[index]]).toFixed(4);
                 else line2 = "Value: null";
-                line3 = "Std. Dev.: " + (data.features[graph].zScores[indices[index]]).toFixed(4);
+                line3 = "z-score: " + (data.features[graph].zScores[indices[index]]).toFixed(4);
             }
         }
 
@@ -1136,18 +1233,18 @@ function setup(data) {
                 return d;
             });
 
-        //darken moused-over rectangle
-        d3.select(graphElement.get()[0]) //get the data rectangles inside the graph element
+        //darken moused-over cell line in all graphs
+        d3.select(".graph") //get all the graphs
             .selectAll(".data")
             .each(function (d, i) {
                 if (i === index) {
-                    d3.select(this).style("fill", "black");
-                }
-                else {
-                    d3.select(this).style("fill", $(this).css("defaultFill"));     
-
+                    d3.selectAll(".shadow")
+                        .attr("x", $(this).attr("x"))
+                        .attr("width",$(this).attr("width"))
+                        .attr("fill","slateblue");
                 }
             });
+
     }
 
     function updateBoxTooltip (feature, boxIndex, bucketMembers, bucketNumbers) { 
@@ -1194,7 +1291,7 @@ function setup(data) {
             .style("text-align", "center")
             .style("font", "10px Arial")
             .style("margin-bottom","5px")
-            .style("background-color", "lightgray")
+            .style("background-color", "silver")
             .text("Click to hide")
             .on("click", function () {
                 $("#" + feature + " .boxTooltip").toggle();
@@ -1254,7 +1351,7 @@ function setup(data) {
                 return d.name;                    
             })
             .on("mouseover", function () {
-                d3.select(this).style("background-color","lightgray");
+                d3.select(this).style("background-color","silver");
             })
             .on("mouseout", function () {
                 d3.select(this).style("background-color","white");
