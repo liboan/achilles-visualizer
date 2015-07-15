@@ -198,7 +198,6 @@ function setup(data) {
 
         //Annoying Graph View Resize Stuff
         $(window).on("resize", function () {
-            console.log("resize");
             $("#mainUI").css("width", ($(window).width() - leftWidth - 40) + "px");
             $(".graphWrapper").css("width", ($(window).width() - leftWidth - 40) + "px");
         });
@@ -410,6 +409,12 @@ function setup(data) {
 
         //////Lefts//////
 
+        function getGeneFromFeature(name) {
+            name = name.slice(name.indexOf("_") + 1);
+            if (name.indexOf(" ") !== -1) name = name.slice(0, name.indexOf(" "));
+            return name;
+        }
+
         var lefts = featureWindows.append("div")
             .style("width",leftWidth + "px")
             .style("display","inline-block")
@@ -422,7 +427,20 @@ function setup(data) {
                 return "f" + i + "Left";
             });
 
-        lefts.append("br");
+        lefts.append("div")
+            .style("margin-top","6px")
+            .style("font-size", "12px")
+            .append("a")
+            .text(function (d) {
+                var name = getGeneFromFeature(d.name);
+                return "TumorPortal entry for " + name                
+            })
+            .attr("target", "blank")
+            .attr("href", function (d) {
+                var name = getGeneFromFeature(d.name);
+                return "http://www.tumorportal.org/view?geneSymbol=" + name
+            });
+
 
         lefts.append("div") //importance
             .text(function (d) {
@@ -430,7 +448,7 @@ function setup(data) {
             })
             .style("padding-top", "4px")
             .style("padding-bottom", "4px")
-            .style("margin-top", "6px")
+            .style("margin-top", "4px")
             .style("margin-bottom", "6px")
             .style("width", function (d) {
                 return Math.floor(leftWidth * d.importance) + "px";
@@ -451,17 +469,6 @@ function setup(data) {
             .attr("value","Show/hide scatter or box plot");
 
         //////Graphs//////
-
-
-
-        // if (id !== "target") {    
-        //     if (/^.MUT/.exec(data.features[id].name)) { //if it's a mutation, draw box plot instead
- 
-        //     }
-        //     else {
-
-        //     }
-        // }        
 
         var graphWrapper = featureWindows.append("div")
             .attr("class", "graphWrapper")
