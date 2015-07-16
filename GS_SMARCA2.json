@@ -433,7 +433,10 @@
   ], 
   "features": [
     {
+      "name": "Exp_SMARCA4 (ENSG00000127616.9)", 
       "importance": 0.6912, 
+      "loci": "19p13.3", 
+      "gene_symbol": "SMARCA4", 
       "values": [
         5.01989713647482, 
         5.25073158779468, 
@@ -866,10 +869,14 @@
         4.61936957648887, 
         4.08146575548402
       ], 
-      "name": "Exp_SMARCA4 (ENSG00000127616.9)"
+      "type": "exp", 
+      "description": "Expression as log2(RPKM)"
     }, 
     {
+      "name": "DMUTmis_SMARCA4", 
       "importance": 0.0896, 
+      "loci": "19p13.3", 
+      "gene_symbol": "SMARCA4", 
       "values": [
         0.0, 
         0.0, 
@@ -1302,10 +1309,14 @@
         0.0, 
         0.0
       ], 
-      "name": "DMUTmis_SMARCA4"
+      "type": "mut", 
+      "description": "DNA missense mutations"
     }, 
     {
+      "name": "Exp_C8orf37 (ENSG00000156172.5)", 
       "importance": 0.0611, 
+      "loci": "8q22.1", 
+      "gene_symbol": "C8orf37", 
       "values": [
         1.2139618711091, 
         1.09784808022157, 
@@ -1738,10 +1749,14 @@
         1.06039331222714, 
         1.83372400514195
       ], 
-      "name": "Exp_C8orf37 (ENSG00000156172.5)"
+      "type": "exp", 
+      "description": "Expression as log2(RPKM)"
     }, 
     {
+      "name": "Exp_VSTM1 (ENSG00000189068.5)", 
       "importance": 0.0041, 
+      "loci": "19q13.42", 
+      "gene_symbol": "VSTM1", 
       "values": [
         -3.1667475045193, 
         -1.38732365668911, 
@@ -2174,10 +2189,14 @@
         -2.72259982621367, 
         -3.197001208039
       ], 
-      "name": "Exp_VSTM1 (ENSG00000189068.5)"
+      "type": "exp", 
+      "description": "Expression as log2(RPKM)"
     }, 
     {
+      "name": "RMUTdmg_SMARCA4", 
       "importance": 0.005, 
+      "loci": "19p13.3", 
+      "gene_symbol": "SMARCA4", 
       "values": [
         0.0, 
         0.0, 
@@ -2610,10 +2629,14 @@
         0.0, 
         0.0
       ], 
-      "name": "RMUTdmg_SMARCA4"
+      "type": "mut", 
+      "description": "DNA damaging mutations"
     }, 
     {
+      "name": "RMUTmisind_ANO6", 
       "importance": 0.0068, 
+      "loci": "12q12-q13.11", 
+      "gene_symbol": "ANO6", 
       "values": [
         0.0, 
         0.0, 
@@ -3046,10 +3069,14 @@
         0.0, 
         0.0
       ], 
-      "name": "RMUTmisind_ANO6"
+      "type": "mut", 
+      "description": "RNA missense mutations + indels"
     }, 
     {
+      "name": "RMUTdmg_OXNAD1", 
       "importance": 0.0059, 
+      "loci": "3p25-p24", 
+      "gene_symbol": "OXNAD1", 
       "values": [
         0.0, 
         0.0, 
@@ -3482,10 +3509,14 @@
         0.0, 
         0.0
       ], 
-      "name": "RMUTdmg_OXNAD1"
+      "type": "mut", 
+      "description": "DNA damaging mutations"
     }, 
     {
+      "name": "CN_NUDT12", 
       "importance": 0.0041, 
+      "loci": "5q15", 
+      "gene_symbol": "NUDT12", 
       "values": [
         null, 
         null, 
@@ -3918,10 +3949,14 @@
         0.1889, 
         -0.0286
       ], 
-      "name": "CN_NUDT12"
+      "type": "cn", 
+      "description": "Copy number"
     }, 
     {
+      "name": "Exp_LGSN (ENSG00000146166.11)", 
       "importance": 0.0005, 
+      "loci": "6q12", 
+      "gene_symbol": "LGSN", 
       "values": [
         -3.17252617934719, 
         -3.1152342827525, 
@@ -4354,10 +4389,14 @@
         -3.10155589976348, 
         -3.18949478794821
       ], 
-      "name": "Exp_LGSN (ENSG00000146166.11)"
+      "type": "exp", 
+      "description": "Expression as log2(RPKM)"
     }, 
     {
+      "name": "Exp_NCF4 (ENSG00000100365.10)", 
       "importance": 0.0029, 
+      "loci": "22q13.1", 
+      "gene_symbol": "NCF4", 
       "values": [
         -3.00403349096887, 
         -3.00811269842088, 
@@ -4790,10 +4829,14 @@
         -3.14136965321377, 
         -1.13492496346936
       ], 
-      "name": "Exp_NCF4 (ENSG00000100365.10)"
+      "type": "exp", 
+      "description": "Expression as log2(RPKM)"
     }, 
     {
+      "name": "Exp_MLYCD (ENSG00000103150.4)", 
       "importance": 0.0028, 
+      "loci": "16q24", 
+      "gene_symbol": "MLYCD", 
       "values": [
         1.7558250560996, 
         1.40471786995199, 
@@ -5226,10 +5269,14 @@
         2.36045530253124, 
         2.82217478189848
       ], 
-      "name": "Exp_MLYCD (ENSG00000103150.4)"
+      "type": "exp", 
+      "description": "Expression as log2(RPKM)"
     }, 
     {
+      "name": "CN_TNFRSF19", 
       "importance": 0.0034, 
+      "loci": "13q12.11-q12.3", 
+      "gene_symbol": "TNFRSF19", 
       "values": [
         null, 
         null, 
@@ -5662,10 +5709,14 @@
         -0.7347, 
         -0.7384
       ], 
-      "name": "CN_TNFRSF19"
+      "type": "cn", 
+      "description": "Copy number"
     }, 
     {
+      "name": "Exp_PLXNB3 (ENSG00000198753.7)", 
       "importance": 0.0023, 
+      "loci": "Xq28", 
+      "gene_symbol": "PLXNB3", 
       "values": [
         0.797873771206173, 
         0.39412885965896, 
@@ -6098,10 +6149,14 @@
         1.11828463208735, 
         1.34135503498193
       ], 
-      "name": "Exp_PLXNB3 (ENSG00000198753.7)"
+      "type": "exp", 
+      "description": "Expression as log2(RPKM)"
     }, 
     {
+      "name": "Exp_C5AR2 (ENSG00000134830.2)", 
       "importance": 0.0012, 
+      "loci": "19q13.33", 
+      "gene_symbol": "C5AR2", 
       "values": [
         -3.14955227794126, 
         -3.0665654221084, 
@@ -6534,10 +6589,14 @@
         -3.13460010732524, 
         1.8582834319025
       ], 
-      "name": "Exp_C5AR2 (ENSG00000134830.2)"
+      "type": "exp", 
+      "description": "Expression as log2(RPKM)"
     }, 
     {
+      "name": "Exp_RHOV (ENSG00000104140.6)", 
       "importance": 0.0007, 
+      "loci": "15q13.3", 
+      "gene_symbol": "RHOV", 
       "values": [
         0.0406652277302125, 
         -3.01104165259749, 
@@ -6970,10 +7029,14 @@
         -0.532283133580035, 
         5.61049809903699
       ], 
-      "name": "Exp_RHOV (ENSG00000104140.6)"
+      "type": "exp", 
+      "description": "Expression as log2(RPKM)"
     }, 
     {
+      "name": "DMUTdmg_CNTN1", 
       "importance": 0.0039, 
+      "loci": "12q11-q12", 
+      "gene_symbol": "CNTN1", 
       "values": [
         0.0, 
         0.0, 
@@ -7406,10 +7469,14 @@
         0.0, 
         0.0
       ], 
-      "name": "DMUTdmg_CNTN1"
+      "type": "mut", 
+      "description": "DNA damaging mutations"
     }, 
     {
+      "name": "DMUTmis_NAV3", 
       "importance": 0.0038, 
+      "loci": "12q14.3", 
+      "gene_symbol": "NAV3", 
       "values": [
         0.0, 
         0.0, 
@@ -7842,10 +7909,14 @@
         0.0, 
         0.0
       ], 
-      "name": "DMUTmis_NAV3"
+      "type": "mut", 
+      "description": "DNA missense mutations"
     }, 
     {
+      "name": "Exp_KIAA1598 (ENSG00000187164.12)", 
       "importance": 0.0036, 
+      "loci": "10q26.12", 
+      "gene_symbol": "KIAA1598", 
       "values": [
         3.9128558126362, 
         4.8852873585979, 
@@ -8278,10 +8349,14 @@
         4.06227371199845, 
         5.23259667822048
       ], 
-      "name": "Exp_KIAA1598 (ENSG00000187164.12)"
+      "type": "exp", 
+      "description": "Expression as log2(RPKM)"
     }, 
     {
+      "name": "Exp_TGM2 (ENSG00000198959.6)", 
       "importance": 0.0028, 
+      "loci": "20q12", 
+      "gene_symbol": "TGM2", 
       "values": [
         -0.665339284980343, 
         7.1429912987666, 
@@ -8714,10 +8789,14 @@
         4.17572418538028, 
         0.0193745580856465
       ], 
-      "name": "Exp_TGM2 (ENSG00000198959.6)"
+      "type": "exp", 
+      "description": "Expression as log2(RPKM)"
     }, 
     {
+      "name": "Exp_PARP11 (ENSG00000111224.8)", 
       "importance": 0.0011, 
+      "loci": "12p13.3", 
+      "gene_symbol": "PARP11", 
       "values": [
         -2.08151728377821, 
         1.22193955012075, 
@@ -9150,7 +9229,8 @@
         1.38942804205449, 
         1.62598300942226
       ], 
-      "name": "Exp_PARP11 (ENSG00000111224.8)"
+      "type": "exp", 
+      "description": "Expression as log2(RPKM)"
     }
   ], 
   "target": [

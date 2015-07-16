@@ -194,7 +194,18 @@ function setup(data) {
         //Feature UI Stuff
         $(".detailButton").click(function () {
             $(this).parent().parent().parent().children(".details").toggle();
-        });        
+        });
+
+        $(".featureTitle").on("mousemove", function () {
+            $(this).css("background-color","lightgray");
+            $(this).on("mouseout", function () {
+                $(this).css("background-color","white")
+            })
+        })
+
+        $(".featureTitle").click(function () {
+            $(this).parent().children(".moreInfo").toggle();
+        })
 
         //Annoying Graph View Resize Stuff
         $(window).on("resize", function () {
@@ -409,54 +420,73 @@ function setup(data) {
 
         //////Lefts//////
 
-        function getGeneFromFeature(name) {
-            name = name.slice(name.indexOf("_") + 1);
-            if (name.indexOf(" ") !== -1) name = name.slice(0, name.indexOf(" "));
-            return name;
-        }
-
         var lefts = featureWindows.append("div")
             .style("width",leftWidth + "px")
             .style("display","inline-block")
             .style("margin", "4px")            
-            .text(function (d) {
-                return d.name;
-            })
             .attr("class", "left")
             .attr("id", function (d, i) {
                 return "f" + i + "Left";
             });
 
+
         lefts.append("div")
-            .style("margin-top","6px")
+            .attr("class","featureTitle")
+            .text(function (d) {
+                return d.name;
+            });
+
+        var moreInfo = lefts.append("div")
+            .attr("class","moreInfo")
             .style("font-size", "12px")
+            .style("margin","4px")
+            .style("position","relative")
+            .style("display","none")
+            .style("left","0px")
+            .style("top","0px")
+            .style("z-index","1")
+            .style("width", $(".featureWindow").css("width"))
+            .style("height","42px");
+
+        moreInfo.append("div")
+            .text(function (d) {
+                return d.gene_symbol + " " + d.description;
+            });
+
+        moreInfo.append("div")
+            .text(function (d) {
+                return "Loci: " + d.loci;
+            });
+
+        moreInfo.append("div")
+            .style("margin-top","2x")
             .append("a")
             .text(function (d) {
-                var name = getGeneFromFeature(d.name);
-                return "TumorPortal entry for " + name                
+                return "TumorPortal entry for " + d.gene_symbol;
             })
             .attr("target", "blank")
             .attr("href", function (d) {
-                var name = getGeneFromFeature(d.name);
-                return "http://www.tumorportal.org/view?geneSymbol=" + name
+                return "http://www.tumorportal.org/view?geneSymbol=" + d.gene_symbol;
             });
 
-
         lefts.append("div") //importance
+            .style("width",$(".featureWindow").css("width"))
+            .append("div")
             .text(function (d) {
                 return d.importance;
             })
-            .style("padding-top", "4px")
-            .style("padding-bottom", "4px")
-            .style("margin-top", "4px")
-            .style("margin-bottom", "6px")
+            .style("font-size", "13px")
+            .style("padding-top", "2px")
+            .style("padding-bottom", "2px")
+            .style("margin-top", "4px")            
+            .style("margin-bottom", "4px")
             .style("width", function (d) {
                 return Math.floor(leftWidth * d.importance) + "px";
             })
             .style("background-color", "red")
             .style("display", "inline-block");
 
-        lefts.append("br");
+        //lefts.append("br");
 
         //////Feature UI stuff//////
 
@@ -492,7 +522,7 @@ function setup(data) {
             .append("svg")
             .attr("class", "prediction")
             .attr("class", function (d, i) {
-                if (/^.MUT/.exec(data.features[i].name)) return "box"; //if it's a mutation, it's a box plot
+                if (data.features[i].type === "mut") return "box"; //if it's a mutation, it's a box plot
                 else return "scatter";
             })
             .attr("id", function (d, i) {
@@ -505,7 +535,7 @@ function setup(data) {
             .append("svg")
             .attr("class", "target")
             .attr("class", function (d, i) {
-                if (/^.MUT/.exec(data.features[i].name)) return "box"; //if it's a mutation, it's a box plot
+                if (data.features[i].type === "mut") return "box"; //if it's a mutation, it's a box plot
                 else return "scatter";                
             })
             .attr("id", function (d, i) {
@@ -547,7 +577,7 @@ function setup(data) {
         var featureOutput; //control bar height, values or z-scores. FEATURES ONLY!
 
         if (id !== "target") {
-            if (zScoreState && !(/^.MUT/.exec(data.features[id].name))) {
+            if (zScoreState && !(data.features[id].type === "mut")) {
                 featureOutput = data.features[id].zScores;
             }
             else {
@@ -592,7 +622,7 @@ function setup(data) {
 
         var y;
 
-        if (id === "target" || !(/^.MUT/.exec(data.features[id].name))) { //only add z-score label & values on y-axis if not mutation
+        if (id === "target" || !(data.features[id].type === "mut")) { //only add z-score label & values on y-axis if not mutation
             y = d3.scale.linear() //set up scale
                 .domain([min,max])
                 .range([graphHeight - graphTopPadding, graphTopPadding]);
@@ -776,7 +806,7 @@ function setup(data) {
             .attr("fill","none");
 
         if (id !== "target") {    
-            if (/^.MUT/.exec(data.features[id].name)) { //if it's a mutation, draw box plot instead
+            if (data.features[id].type === "mut") { //if it's a mutation, draw box plot instead
                 updateBoxPlot(id, "p");
                 updateBoxPlot(id, "t");
             }
@@ -1211,7 +1241,8 @@ function setup(data) {
                 line1 = "Cell Line: " + data.cellline[indices[index]];
                 if (data.features[graph].values[indices[index]] !== null) line2 = "Value: " + (data.features[graph].values[indices[index]]).toFixed(4);
                 else line2 = "Value: null";
-                line3 = "z-score: " + (data.features[graph].zScores[indices[index]]).toFixed(4);
+                if (data.features[graph].type === "mut") line3 = "";
+                else line3 = "z-score: " + (data.features[graph].zScores[indices[index]]).toFixed(4);
             }
         }
 
@@ -1309,7 +1340,8 @@ function setup(data) {
             .style("text-align", "center")
             .style("font", "bold 14px Arial")
             .text(function () {
-                return boxIndex + " Muts (" + bucketMembers.length + " lines)";
+                var mutText;
+                return boxIndex + " Mutant Alleles (" + bucketMembers.length + " lines)";
             })
 
         var detailTable = tooltip.append("table")
@@ -1391,7 +1423,6 @@ function setup(data) {
     function updateScatterTooltip(graph, cellline) { //Updates the scatterplot tooltip whenever mouse is over a circle
         //graph = string, id of the graph, cellline = string, name of cellline
         var graphElement = $("#" + graph);
-        console.log(graph + " " + graphElement.offset().left);
 
         var tooltip = d3.select("#tooltip")
             .style("display","block")
