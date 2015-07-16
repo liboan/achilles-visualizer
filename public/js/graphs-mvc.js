@@ -250,8 +250,11 @@ function setup(data) {
 
     function initWindow() {
         d3.select("body")
-            .append("div")
+            .insert("div","div")
             .attr("id","graphWindow")
+            .style("padding-bottom", "10px")
+            .style("margin-bottom", "10px")
+            .style("border-bottom", "2px solid black")
 
         initFeatureWindows(); //add features first in order to prevent counting problem
         initTargetWindow();
@@ -397,8 +400,26 @@ function setup(data) {
         sortDiv.append("input")
             .attr("type", "button")
             .attr("id", "sortT")
-            .attr("value", "Target");                 
+            .attr("value", "Target");   
+
+        targetWindow.append("div")
+            .attr("id","about")
+            .style("background-color","lightgray")
+            .style("display","inline-block")
+            .style("font", "12px Arial")
+            .style("float", "right")
+            .on("mouseover", function() {
+                $("#acknowledgement").toggle();
+            })
+            .on("mouseout", function() {
+                $("#acknowledgement").toggle();
+            })
+            .append("div")
+            .text("About");              
         
+        $("#acknowledgement").detach().appendTo("#about");
+        $("#acknowledgement").css("display","none");
+
         //add foundation div to sit underneath target window
         d3.select("#graphWindow")
             .insert("div", ".featureWindow") //insert ahead of the feature windows
@@ -445,8 +466,8 @@ function setup(data) {
             .style("left","0px")
             .style("top","0px")
             .style("z-index","1")
-            .style("width", $(".featureWindow").css("width"))
-            .style("height","42px");
+            .style("width", (leftWidth - 10) + "px")
+            .style("height","40px");
 
         moreInfo.append("div")
             .text(function (d) {
