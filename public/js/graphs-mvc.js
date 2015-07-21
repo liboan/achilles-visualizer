@@ -46,12 +46,12 @@ function setup(data) {
     };
 
     var zoom = 1;
+    var sortIndex = 0;
     var zScoreState = false;
     var backgroundState = false;
 
-  
-
-
+    var filterOptions;
+    var sortOptions;
 
     //////CONTROLLER//////
 
@@ -69,9 +69,21 @@ function setup(data) {
         };  
     }
 
-    function sort(item) { //item = int specifying what to sort by. 0 = cell line lineage, 1 = predictions, 2 = target
-        switch (item) {
-            case 0: //cell line lineage
+    function sortGraphValues() { 
+        switch (sortIndex) {
+            case 0: //target
+                indices.sort(function (a, b) {
+                    return data.target[a] - data.target[b];
+                });
+                break;
+
+            case 1: //predictions
+                indices.sort(function (a, b) {
+                    return data.predictions[a] - data.predictions[b];
+                });
+                break;
+
+            case 2: //lineage
                 indices.sort(function (a, b) { //comparing two indices.
                     var aString = data.cellline[a];
                     var bString = data.cellline[b];
@@ -86,17 +98,19 @@ function setup(data) {
                 });
                 break;
 
-            case 1: //predictions
+            default: //sortIndex >= 3: sort by value of selected feature
                 indices.sort(function (a, b) {
-                    return data.predictions[a] - data.predictions[b];
-                });
-                break;
+                    var aVal = data.features[sortIndex - 3].values[a]; //features start at 3 in the options list, so subtract three
+                    var bVal = data.features[sortIndex - 3].values[b];
 
-            case 2: //target
-                indices.sort(function (a, b) {
-                    return data.target[a] - data.target[b];
+                    if (aVal === null) aVal = -1; //stick nulls below 0s
+                    if (bVal === null) bVal = -1;
+
+                    if (aVal < bVal) return -1;
+                    else if (aVal > bVal) return 1;
+                    else return 0;
                 });
-                break;
+
         }
         updateGraph("target");
         for (var i = 0; i < data.features.length; i++) {
@@ -104,11 +118,9 @@ function setup(data) {
         };  
     }
 
-    function toggleZScore() {
-        zScoreState = !zScoreState;
+    function toggleZScore() { //checks the checkbox, sets state var accordingly
 
-        if (zScoreState) $("#zScoreButton").val("Click for values");
-        else $("#zScoreButton").val("Click for z-scores");
+        zScoreState = $("#zScoreCheck").is(":checked");
 
         for (var i = 0; i < data.features.length; i++) {
             updateGraph(i);
@@ -117,9 +129,7 @@ function setup(data) {
     }
 
     function toggleBackground () {
-        backgroundState = !backgroundState
-        if (backgroundState) $("#background").val("Hide lineage colors");
-        else $("#background").val("Show lineage colors");
+        backgroundState = $("#background").is(":checked");
         updateGraph("target");
         for (var i = 0; i < data.features.length; i++) {
             updateGraph(i);
@@ -145,7 +155,7 @@ function setup(data) {
             return updateZoom(-1);
         });
 
-        $("#zScoreButton").click(toggleZScore);
+        $("#zScoreCheck").click(toggleZScore);
 
         $("#filter").change(function () {
             filter($("#filter option:selected").text());
@@ -153,16 +163,9 @@ function setup(data) {
 
         $("#background").click(toggleBackground);
 
-        $("#sortL").click(function () {
-            return sort(0);
-        });
-
-        $("#sortP").click(function () {
-            return sort(1);
-        });
-
-        $("#sortT").click(function () {
-            return sort(2);
+        $("#sort").change(function () {
+            sortIndex = sortOptions.indexOf($("#sort option:selected").text());
+            sortGraphValues();
         });
 
         //Graph Mouseover Stuff
@@ -246,7 +249,6 @@ function setup(data) {
     var scatterLeftPadding = 50;
     var scatterTopPadding = 50;
 
-    var filterOptions;
 
     function initWindow() {
         d3.select("body")
@@ -272,9 +274,12 @@ function setup(data) {
         var targetWindow = d3.select("#graphWindow")
             .insert("div","div")
             .attr("id", "target")
+            .style("z-index", "1")
             .style("position","fixed")
             .style("background-color", "white")
             .style("margin-bottom", "10px")
+            .style("margin-top", "-8px")
+            .style("padding-top", "8px")
             .style("border-bottom", "1px solid black");
 
         targetWindow.append("div")
@@ -287,7 +292,7 @@ function setup(data) {
             .append("div")
             .attr("class", "title")
             .style("margin-bottom", "2px")
-            .text("GS_SMARCA2 *not in JSON :( *");
+            .text(data.target_name);
 
         d3.select("#targetLeft").selectAll("div .summary")
             .data(data.report_summary)
@@ -324,6 +329,14 @@ function setup(data) {
         }   
         filterOptions.sort();        
 
+        //get sorting options.
+        sortOptions = ["TARGET", "PREDICTION", "LINEAGE"]
+
+        data.features.forEach(function (x) {
+            sortOptions.push(x.name)
+        });
+
+
         var mainUI = targetWindow.append("div")
             .attr("id", "mainUI")
             .style("position","relative")
@@ -349,24 +362,42 @@ function setup(data) {
             .attr("id", "zoomOut")
             .attr("value", "-");  
 
-        mainUI.append("input")
+        var zScoreDiv = mainUI.append("div")
+            .style("display", "inline-block")            
+            .style("margin", "6px");        
+
+        zScoreDiv.append("span")
+            .text("Show feature z-scores ")    
+
+        zScoreDiv.append("input")
             .style("margin-right", "10px")        
-            .attr("type", "button")
-            .attr("id", "zScoreButton")
-            .attr("value", "Show z-scores");
+            .attr("type", "checkbox")
+            .attr("id", "zScoreCheck")
+
+        var colorDiv = mainUI.append("div")
+            .style("display", "inline-block")            
+            .style("margin", "6px");  
+
+        colorDiv.append("span")
+            .text("Show lineage colors")
+
+        colorDiv.append("input")
+            .attr("type", "checkbox")
+            .attr("id", "background")
+            .style("margin-left", "4px");
 
         var filterDiv = mainUI.append("div")
             .style("display", "inline-block")        
-            .style("margin", "6px");
+            .style("margin", "6px");            
 
         filterDiv.append("span")
-            .text("Filter ");
+            .text("   Filter by lineage: ");
 
-        var filter = filterDiv.append("select")
+        var filterSelect = filterDiv.append("select")
             .attr("id", "filter")
             .attr("value","NONE");
 
-        filter.selectAll("option")
+        filterSelect.selectAll("option")
             .data(filterOptions)
             .enter()
             .append("option")
@@ -374,33 +405,36 @@ function setup(data) {
                 return d;
             });
 
-        filterDiv.append("input")
-            .attr("type", "button")
-            .attr("id", "background")
-            .attr("value", "Show lineage colors")
-            .style("margin-left", "4px");
-
         var sortDiv = mainUI.append("div")
             .style("display", "inline-block")
             .style("margin", "6px");
 
         sortDiv.append("span")
-            .text("Sort ");
+            .text("Sort by value: ");
 
-        sortDiv.append("input")
-            .attr("type", "button")
-            .attr("id", "sortL")
-            .attr("value", "Lineage"); 
+        var sortSelect = sortDiv.append("select")
+            .attr("id", "sort");
 
-        sortDiv.append("input")
-            .attr("type", "button")
-            .attr("id", "sortP")
-            .attr("value", "Prediction"); 
+        sortSelect.selectAll("option")
+            .data(sortOptions.slice(0,3)) //first three- target, prediction, lineage
+            .enter()
+            .append("option")
+            .text(function (d) {
+                return d;
+            });
 
-        sortDiv.append("input")
-            .attr("type", "button")
-            .attr("id", "sortT")
-            .attr("value", "Target");   
+        sortSelect.append("optgroup") //stuff feature options under an optgroup
+            .attr("label","Features")
+            .selectAll("option .feature")
+            .data(sortOptions.slice(3))
+            .enter()
+            .append("option")
+            .attr("class", "feature")
+            .text(function (d) {
+                return d;
+            })
+
+
 
         targetWindow.append("div")
             .attr("id","about")
@@ -526,7 +560,7 @@ function setup(data) {
             .style("vertical-align", "top")
             .style("display", "inline-block")
             .style("width",($(window).width() - leftWidth - 40) + "px")
-            .style("overflow-x", "auto");
+            .style("overflow-x", "hidden");
 
         var graphs = graphWrapper.append("svg")
             .attr("class", "graph")
@@ -539,6 +573,9 @@ function setup(data) {
 
         var predictionScatters = featureWindows.append("div")
             .attr("class", "details")
+            .style("position", "relative")
+            .style("z-index","0")
+            .style("left", leftWidth + "px")
             .style("display","none")
             .append("svg")
             .attr("class", "prediction")
@@ -571,6 +608,7 @@ function setup(data) {
         d3.select("body")
             .append("div")
             .attr("id","tooltip")
+            .style("z-index","10")
             .style("position","fixed")
             .style("background-color", "white")
             .style("padding","4px")
@@ -594,7 +632,7 @@ function setup(data) {
             .style("z-index", "1")
     }
 
-    function updateGraph (id) { //id = string or int used to access an svg graph. "target" for target/prediction graph, an int for feature
+    function updateGraph(id) { //id = string or int used to access an svg graph. "target" for target/prediction graph, an int for feature
         var featureOutput; //control bar height, values or z-scores. FEATURES ONLY!
 
         if (id !== "target") {
@@ -844,6 +882,7 @@ function setup(data) {
         var yMin = Infinity, yMax = -Infinity;
 
         var output; //depending on type, either data.predictions or data.target. Makes stuff simpler.
+        var other; //the other graph
         var input; //either z-score or feature value
 
         if (zScoreState) {
@@ -863,9 +902,11 @@ function setup(data) {
         switch (type) {
             case "p":
                 output = data.predictions;
+                other = data.target
                 break;
             case "t":
                 output = data.target;
+                other = data.predictions;
                 break;
             default:
                 output = data.predictions;
@@ -920,27 +961,46 @@ function setup(data) {
             .attr("cy", function (d) {
                 return y(output[d]);
             })
-            .style("fill", "blue")
+            .style("fill", "black")
             .on("mouseover", function (d) {
-                //console.log($(scatter[0]).attr("id") + " " + data.cellline[d] + " " + data.features[id].values[d] + " " + output[d]);
-                updateScatterTooltip($(scatter[0]).attr("id"), data.cellline[d]);
-                scatter.select(".mouseLineX")
-                    .attr("stroke","black")
-                    .attr("y1", y(output[d]))
-                    .attr("y2", y(output[d]));
+                updateScatterTooltip($(scatter[0]).attr("id"), data.cellline[d], event);
 
-                scatter.select(".mouseLineY")
-                    .attr("stroke","black")
-                    .attr("x1", x(input[d]))
-                    .attr("x2", x(input[d]));
+                d3.selectAll("#f" + id + " .scatter") //crappy workaround- have to select both scatterplots
+                    .each(function (dud, i) { //preserve d from outside- the index of the value
+                        var drawData;
+                        switch (i) {
+                            case 0: //first svg is predictions
+                                drawData = data.predictions;
+                                break;
+                            case 1: //second is targets
+                                drawData = data.target;
+                                break;
+                        }
+
+                        d3.select(this).select(".mouseLineX")
+                            .attr("stroke","gray")
+                            .attr("stroke-width", "2px")
+                            .attr("y1", y(drawData[d]))
+                            .attr("y2", y(drawData[d]));
+
+                        d3.select(this).select(".mouseLineY")
+                            .attr("stroke","gray")
+                            .attr("stroke-width", "2px")
+                            .attr("x1", x(input[d]))
+                            .attr("x2", x(input[d]));                        
+                    });
+
+
             })
             .on("mouseout", function () {
                 $("#tooltip").toggle();
-                scatter.select(".mouseLineX")
+                d3.selectAll("#f" + id + " .scatter")
+                    .select(".mouseLineX")
                     .attr("stroke","none");
 
-                scatter.select(".mouseLineY")
-                    .attr("stroke","none")
+                d3.selectAll("#f" + id + " .scatter")
+                    .select(".mouseLineY")
+                    .attr("stroke","none");
             });
 
         scatter.append("line") //mouseover XY lines
@@ -979,9 +1039,9 @@ function setup(data) {
             .text(function () {
                 switch (type) {
                     case "p": 
-                        return "Predicted *gene name* Dependency";
+                        return data.target_name + " Predicted Dependency";
                     case "t":
-                        return "Target *gene name* Dependency";
+                        return data.target_name + " Target Dependency";
                 }
             });         
     }
@@ -1070,9 +1130,9 @@ function setup(data) {
             .text(function () {
                 switch (type) {
                     case "p": 
-                        return "Predicted *gene name* Dependency";
+                        return data.target_name + " Predicted Dependency";
                     case "t":
-                        return "Target *gene name* Dependency";
+                        return data.target_name + " Target Dependency";
                 }
             });     
 
@@ -1110,7 +1170,7 @@ function setup(data) {
             .attr("height", function (d) {
                 return y(d3.quantile(getElement(d,0), 0.25)) - y(d3.quantile(getElement(d,0), 0.75));
             })
-            .style("stroke", "blue")
+            .style("stroke", "black")
             .style("fill", "none");
 
         boxes.append("line") //max line
@@ -1126,7 +1186,7 @@ function setup(data) {
             .attr("y2", function (d) {
                 return y(d3.max(getElement(d,0)));
             })
-            .style("stroke", "blue")
+            .style("stroke", "black")
             .style("stroke-width", "2px");
 
         boxes.append("line") //min line
@@ -1142,7 +1202,7 @@ function setup(data) {
             .attr("y2", function (d) {
                 return y(d3.min(getElement(d,0)));
             })
-            .style("stroke","blue")            
+            .style("stroke","black")            
             .style("stroke-width", "2px");   
 
         boxes.append("line") //median line
@@ -1158,7 +1218,7 @@ function setup(data) {
             .attr("y2", function (d) {
                 return y(d3.median(getElement(d,0)));
             })
-            .style("stroke", "blue")
+            .style("stroke", "black")
             .style("stroke-width", "2px");
 
         boxes.append("line") //top whisker             
@@ -1174,7 +1234,7 @@ function setup(data) {
             .attr("y2", function (d) {
                 return y(d3.quantile(getElement(d,0), 0.75));
             })
-            .style("stroke", "blue")
+            .style("stroke", "black")
             .style("stroke-width", "1px");
 
         boxes.append("line") //bottom whisker             
@@ -1190,7 +1250,7 @@ function setup(data) {
             .attr("y2", function (d) {
                 return y(d3.quantile(getElement(d,0), 0.25));
             })
-            .style("stroke", "blue")
+            .style("stroke", "black")
             .style("stroke-width", "1px");
 
         boxes.append("rect")
@@ -1292,6 +1352,26 @@ function setup(data) {
                 return d;
             });
 
+        if (data.features[graph].type === "mut") { //add mutations to tooltip if it's a mut feature
+            for (var i = 0; i < a.mutations.length; i++) {
+                if (a.mutations[i].feature === data.features[graph].name && a.mutations[i].cellline === data.cellline[indices[index]]) {
+                    tooltip.append("div")
+                        .text("Mutations:")
+                        .style("font","12px Arial")                        
+                        .selectAll("div")
+                        .data(a.mutations[i].mutations)
+                        .enter()
+                        .append("div")
+                        .style("margin-left","10px")
+                        .style("font", "11px Arial")
+                        .text(function (d) {
+                            return d.mut;
+                        });
+                }
+            }
+
+        }
+
         //darken moused-over cell line in all graphs
         d3.select(".graph") //get all the graphs
             .selectAll(".data")
@@ -1306,7 +1386,7 @@ function setup(data) {
 
     }
 
-    function updateBoxTooltip (feature, boxIndex, bucketMembers, bucketNumbers) { 
+    function updateBoxTooltip(feature, boxIndex, bucketMembers, bucketNumbers) { 
         //feature = string, id of feature window, boxIndex = int, 0,1,2, bucketMembers = array of strings, celllines in the bucket
         //bucketNumbers = array of ints, [min, 1st quartile, median, 3rd quartile, max]
 
@@ -1438,17 +1518,16 @@ function setup(data) {
 
         console.log(bucketMemberDivs);
 
-
     }
 
-    function updateScatterTooltip(graph, cellline) { //Updates the scatterplot tooltip whenever mouse is over a circle
-        //graph = string, id of the graph, cellline = string, name of cellline
+    function updateScatterTooltip(graph, cellline, e) { //Updates the scatterplot tooltip whenever mouse is over a circle
+        //graph = string, id of the graph, cellline = string, name of cellline, e = emitted mouse event
         var graphElement = $("#" + graph);
 
         var tooltip = d3.select("#tooltip")
             .style("display","block")
-            .style("left",(graphElement.offset().left) + "px")
-            .style("top", (graphElement.offset().top - $("body").scrollTop()) + "px")
+            .style("left",(e.x + 1) + "px")
+            .style("top", (e.y + 1) + "px")
             .style("width", "auto")
             .style("height", "auto");
 
@@ -1457,15 +1536,11 @@ function setup(data) {
         tooltip.append("div") 
             .style("font","12px Arial")
             .text(cellline);
+
     }
 
-    //for testing & debugging
     initWindow();
+    sortGraphValues();
 
-    // sort(0);
-    // updateGraph("target");
-    // for (var i = 0; i < data.features.length; i++) {
-    //     updateGraph(i);
-    // };
 
 }

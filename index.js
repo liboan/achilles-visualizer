@@ -21,7 +21,7 @@ app.get("/mut", function (req, res) {
 });
 
 app.get("/mvc", function (req, res) {
-	res.sendFile(__dirname + "/test.html");
+	res.sendFile(__dirname + "/index.html");
 });
 
 var server = app.listen(3000, function () {
