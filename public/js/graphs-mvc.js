@@ -216,7 +216,7 @@ function setup(data) {
             $(this).parent().parent().parent().children(".details").toggle();
         });
 
-        $(".featureDetails").click(function () {
+        $(".featureInfo").click(function () {
             $(this).parent().parent().children(".moreInfo").toggle();
         })
 
@@ -271,7 +271,6 @@ function setup(data) {
         initFeatureWindows(); //add features first in order to prevent counting problem
         initTargetWindow();
         initTooltip();
-        initBoxTooltip();
         updateGraph("target");
         for (var i = 0; i < data.features.length; i++) {
             updateGraph(i);
@@ -538,7 +537,7 @@ function setup(data) {
             .attr("value", "Info")
             .style("display","inline")
             .style("margin-right","10px")
-            .attr("class", "featureDetails");
+            .attr("class", "featureInfo");
 
         uiFields.append("input")
             .attr("class", "detailButton")
@@ -592,14 +591,28 @@ function setup(data) {
             .attr("width", 400)
             .attr("height", graphHeight);
 
-        var predictionScatters = featureWindows.append("div")
+        var detailDivs = featureWindows.append("div")
             .attr("class", "details")
             .style("position", "relative")
             .style("z-index","0")
-            .style("left", (leftWidth + 10) + "px")
-            .style("width", (2 * scatterWidth) + "px")
-            .style("display","none")
-            .append("svg")
+            .style("left", "0px")
+            .style("width", (2 * scatterWidth + leftWidth + 20) + "px")
+            .style("display","none");
+
+
+        detailDivs.append("div")
+            .attr("class","boxTooltip")
+            .style("display", "inline-block")
+            .style("position", "relative")
+            .style("left", "0px")
+            .style("top", "50px")
+            .style("width", leftWidth + "px")
+            .style("vertical-align", "top")
+            .style("margin", "8px")
+            .style("border", "2px solid red")
+            .style("visibility","hidden")
+
+        var predictionScatters = detailDivs.append("svg")
             .attr("class", "prediction")
             .attr("class", function (d, i) {
                 if (data.features[i].type === "mut") return "box"; //if it's a mutation, it's a box plot
@@ -611,8 +624,7 @@ function setup(data) {
             .attr("width", scatterHeight)
             .attr("height", scatterWidth);
 
-        var targetScatters = d3.selectAll(".details")
-            .append("svg")
+        var targetScatters = detailDivs.append("svg")
             .attr("class", "target")
             .attr("class", function (d, i) {
                 if (data.features[i].type === "mut") return "box"; //if it's a mutation, it's a box plot
@@ -638,20 +650,6 @@ function setup(data) {
             .style("display", "none")
             .style("left", "100px")
             .style("top", "100px");
-    }
-
-    function initBoxTooltip() {
-        d3.selectAll(".details")
-            .insert("div","svg")
-            .attr("class","boxTooltip")
-            .style("left", "350px") //arbitrary positioning!
-            .style("top", "0px")                     
-            .style("position","absolute")
-            .style("background-color", "white")
-            .style("padding","4px")
-            .style("border", "2px solid red")
-            .style("display", "none")
-            .style("z-index", "1")
     }
 
     function updateGraph(id) { //id = string or int used to access an svg graph. "target" for target/prediction graph, an int for feature
@@ -1161,7 +1159,14 @@ function setup(data) {
             .attr("text-anchor", "middle")
             .text(function () {
                 return "Mutation in " + data.features[id].name;
-            });       
+            });
+
+        plot.append("text")
+            .attr("x", scatterWidth/2)
+            .attr("y", 40)
+            .style("font", "14px Arial")
+            .attr("text-anchor", "middle")
+            .text("Click box plots to show list of cell lines & mutations")            
 
         var boxes = plot.selectAll("g .boxPlot")
             .data(buckets)
@@ -1282,7 +1287,7 @@ function setup(data) {
             .attr("pointer-events", "all")
             .attr("fill-opacity", 0.0)
             .on("mouseover", function () {
-                d3.select(this).attr("fill-opacity", 0.1);
+                d3.select(this).attr("fill-opacity", 0.2);
             })
             .on("mouseout", function () {
                 d3.select(this).attr("fill-opacity", 0.0);
@@ -1427,15 +1432,8 @@ function setup(data) {
 
         console.log(bucketDetails);
 
-        var detailDiv = $("#" + feature + " .details");
-
         var tooltip = d3.select("#" + feature + " .boxTooltip")
-            .style("display","inline-block")
-            .style("left", (detailDiv.width()/2 - scatterLeftPadding * 2 - 20) + "px") //arbitrary positioning!
-            .style("top", (detailDiv.offset().top + scatterTopPadding) + "px")
-            .style("overflow-y", "auto")            
-            .style("width", "220px")
-            .style("height", "400px");
+            .style("visibility", "visible");
 
         tooltip.selectAll("*").remove();
 
@@ -1447,7 +1445,7 @@ function setup(data) {
             .style("background-color", "silver")
             .text("Click to hide")
             .on("click", function () {
-                $("#" + feature + " .boxTooltip").toggle();
+                $("#" + feature + " .boxTooltip").css("visibility","hidden");
             });            
 
         tooltip.append("div")
@@ -1486,32 +1484,31 @@ function setup(data) {
             });  
 
         tooltip.append("div")
-            .text("Click an entry to show mutation areas")
+            .text("Mutations, if any, are listed under cell line entries")
             .style("font", "10px Arial")
+            .style("margin-bottom", "4px")
             .style("text-align", "center");
 
+        var bucketMemberWrapper = tooltip.append("div")
+            .style("display", "inline-block")
+            .style("width", "inherit")
+            .style("height", "310px") //hardcoded
+            .style("overflow-y", "auto");
 
-        var bucketMemberDivs = tooltip.selectAll("div .bucketMembers")
+
+        var bucketMemberDivs = bucketMemberWrapper.selectAll("div .bucketMembers")
             .data(bucketDetails)
             .enter()
             .append("div")
             .attr("class", "bucketMembers");
 
         bucketMemberDivs.append("div")
+            .style("margin-left", "4px")
             .style("word-wrap","break-word")
             .style("margin-top", "4px")            
             .style("font", "12px Arial")
             .text(function (d, i) {
                 return d.name;                    
-            })
-            .on("mouseover", function () {
-                d3.select(this).style("background-color","silver");
-            })
-            .on("mouseout", function () {
-                d3.select(this).style("background-color","white");
-            })            
-            .on("click", function () {
-                $(this).parent().find(".mutations").toggle();
             });
 
         bucketMemberDivs.each(function (d, i) { //bind mutation array to each bucket member div
@@ -1522,9 +1519,8 @@ function setup(data) {
                 .append("div")
                 .attr("class", "mutations")
                 .style("font","11px Arial")
-                .style("margin-left", "10px")
+                .style("margin-left", "20px")
                 .style("margin-top", "2px")
-                .style("display","none")
                 .text(function (d, i) {
                     return d.mut;
                 });                
