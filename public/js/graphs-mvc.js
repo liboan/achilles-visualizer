@@ -53,6 +53,23 @@ function setup(data) {
     var filterOptions;
     var sortOptions;
 
+    var colorList = ["#ad0000", "#614100", "#006134", "#0000ba", "#ba8cab", "#a15b50", "#e0d970", "#38e0a8", "#1b1b6e", "#e070ac", "#e0b0a8", 
+                     "#576130", "#49615f", "#7070e0", "#543f4a", "#6e1d00", "#96e000", "#00d1e0", "#9f9fd4", "#6e002c", "#a18978", "#609425", 
+                     "#2b82ad", "#d538e0", "#e03865", "#c76a00", "#95c79c", "#004887", "#763d7a", "#e0ac70", "#00c750", "#0000e0", "#a1006b"];
+
+    var lociColorList = ["red","orange","blue","seagreen","violet","brown"]
+
+    var lociColors = {}; //prepare list of loci colors
+    var lociColorIndex = 0;
+
+    a.features.forEach(function (x) { //for every loci with duplicates, choose a color other than black
+        if (!lociColors.hasOwnProperty(x.loci)) lociColors[x.loci] = "black";
+        else if (lociColors[x.loci] === "black") {
+            lociColors[x.loci] = lociColorList[lociColorIndex];
+            lociColorIndex++;            
+        } 
+    });
+
     //////CONTROLLER//////
 
     function filter(lineage) { // lineage = string from filterOptions, contained by some cell line names
@@ -199,15 +216,8 @@ function setup(data) {
             $(this).parent().parent().parent().children(".details").toggle();
         });
 
-        $(".featureTitle").on("mousemove", function () {
-            $(this).css("background-color","lightgray");
-            $(this).on("mouseout", function () {
-                $(this).css("background-color","white")
-            })
-        })
-
-        $(".featureTitle").click(function () {
-            $(this).parent().children(".moreInfo").toggle();
+        $(".featureDetails").click(function () {
+            $(this).parent().parent().children(".moreInfo").toggle();
         })
 
         //Annoying Graph View Resize Stuff
@@ -484,45 +494,22 @@ function setup(data) {
                 return "f" + i + "Left";
             });
 
-
         lefts.append("div")
             .attr("class","featureTitle")
+            .style("display", "inline")
             .text(function (d) {
                 return d.name;
             });
 
-        var moreInfo = lefts.append("div")
-            .attr("class","moreInfo")
+        lefts.append("div")
             .style("font-size", "12px")
-            .style("margin","4px")
-            .style("position","relative")
-            .style("display","none")
-            .style("left","0px")
-            .style("top","0px")
-            .style("z-index","1")
-            .style("width", (leftWidth - 10) + "px")
-            .style("height","40px");
-
-        moreInfo.append("div")
-            .text(function (d) {
-                return d.gene_symbol + " " + d.description;
-            });
-
-        moreInfo.append("div")
+            .style("margin-top", "4px")
+            .style("color", function (d) {
+                if (lociColors.hasOwnProperty(d.loci)) return lociColors[d.loci];
+            })
             .text(function (d) {
                 return "Loci: " + d.loci;
-            });
-
-        moreInfo.append("div")
-            .style("margin-top","2x")
-            .append("a")
-            .text(function (d) {
-                return "TumorPortal entry for " + d.gene_symbol;
-            })
-            .attr("target", "blank")
-            .attr("href", function (d) {
-                return "http://www.tumorportal.org/view?geneSymbol=" + d.gene_symbol;
-            });
+            });            
 
         lefts.append("div") //importance
             .style("width",$(".featureWindow").css("width"))
@@ -539,9 +526,7 @@ function setup(data) {
                 return Math.floor(leftWidth * d.importance) + "px";
             })
             .style("background-color", "red")
-            .style("display", "inline-block");
-
-        //lefts.append("br");
+            .style("display", "inline-block");      
 
         //////Feature UI stuff//////
 
@@ -549,9 +534,45 @@ function setup(data) {
             .attr("class","featureUI")
         
         uiFields.append("input")
+            .attr("type", "button")
+            .attr("value", "Info")
+            .style("display","inline")
+            .style("margin-right","10px")
+            .attr("class", "featureDetails");
+
+        uiFields.append("input")
             .attr("class", "detailButton")
             .attr("type","button")
             .attr("value","Show/hide scatter or box plot");
+
+        //////Extra Feature Info//////
+
+        var moreInfo = lefts.append("div")
+            .attr("class","moreInfo")
+            .style("font-size", "12px")
+            .style("margin","4px")
+            .style("position","relative")
+            .style("display","none")
+            .style("left","0px")
+            .style("top","0px")
+            .style("width", (leftWidth - 10) + "px")
+
+        moreInfo.append("div")
+            .style("margin-top", "2px")
+            .text(function (d) {
+                return d.gene_symbol + " " + d.description;
+            });
+
+        moreInfo.append("div")
+            .style("margin-top","2px")
+            .append("a")
+            .text(function (d) {
+                return "TumorPortal entry for " + d.gene_symbol;
+            })
+            .attr("target", "blank")
+            .attr("href", function (d) {
+                return "http://www.tumorportal.org/view?geneSymbol=" + d.gene_symbol;
+            });
 
         //////Graphs//////
 
@@ -575,7 +596,8 @@ function setup(data) {
             .attr("class", "details")
             .style("position", "relative")
             .style("z-index","0")
-            .style("left", leftWidth + "px")
+            .style("left", (leftWidth + 10) + "px")
+            .style("width", (2 * scatterWidth) + "px")
             .style("display","none")
             .append("svg")
             .attr("class", "prediction")
@@ -739,10 +761,6 @@ function setup(data) {
                 .style("font-size", "10px");                
         }
 
-        var backgroundColors = ["burlywood", "darkolivegreen", "darkturquoise", "springgreen", "salmon", "yellowgreen", "plum", "navy",
-                            "chartreuse", "chocolate", "khaki", "lightcoral", "olive", "firebrick", "teal", "yellow", "tan",
-                            "saddlebrown", "violetred", "goldenrod", "darkgreen"];
-
         if (backgroundState) {
             graph.selectAll("rect .background") //add background color depending on origin
                 .data(indices)
@@ -761,12 +779,12 @@ function setup(data) {
                 .attr("height", function () {
                     return graphHeight - 2 * graphTopPadding;
                 })
-                .attr("fill-opacity", 0.2)
+                .attr("fill-opacity", 0.25)
                 .attr("fill", function (d) {
                     var celllineName = data.cellline[d];
                     for (var i = 1; i < filterOptions.length; i++) { //skip the first, empty option
                         if (celllineName.indexOf(filterOptions[i]) !== -1) {
-                            return backgroundColors[i];
+                            return colorList[i];
                         }
                     }
                 });
@@ -1326,10 +1344,6 @@ function setup(data) {
                 else line3 = "z-score: " + (data.features[graph].zScores[indices[index]]).toFixed(4);
             }
         }
-
-        //console.log(line1 + line2 + line3)
-
-        // console.log(graphElement.offset().top + " " + $("body").scrollTop());
 
         var tooltip = d3.select("#tooltip")
             .style("display",function () {
