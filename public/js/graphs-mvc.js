@@ -225,7 +225,7 @@ function setup(data) {
         //Annoying Graph View Resize Stuff
         $(window).on("resize", function () {
             $("#mainUI").css("width", ($(window).width() - leftWidth - 40) + "px");
-            $(".graphWrapper").css("width", ($(window).width() - leftWidth - 40) + "px");
+            $(".graphWrapper").css("width", (Math.min(900, $(window).width() - leftWidth - 40)) + "px");
         });
 
         //Annoying Scrolling Alignment Stuff
@@ -312,7 +312,7 @@ function setup(data) {
             .attr("class", "graphWrapper")
             .style("vertical-align", "top")
             .style("display", "inline-block")
-            .style("width", ($(window).width() - leftWidth - 40) + "px")
+            .style("width", (Math.min(900, $(window).width() - leftWidth - 40))+ "px")
             .style("overflow-x", "scroll")
 
         graphWrapper.append("svg")
@@ -575,7 +575,7 @@ function setup(data) {
             .attr("class", "graphWrapper")
             .style("vertical-align", "top")
             .style("display", "inline-block")
-            .style("width",($(window).width() - leftWidth - 40) + "px")
+            .style("width",(Math.min(900, $(window).width() - leftWidth - 40)) + "px")
             .style("overflow-x", "hidden");
 
         var graphs = graphWrapper.append("svg")
