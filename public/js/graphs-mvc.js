@@ -122,8 +122,8 @@ function setup(data) {
                     var aVal = data.features[sortIndex - 3].values[a]; //features start at 3 in the options list, so subtract three
                     var bVal = data.features[sortIndex - 3].values[b];
 
-                    if (aVal === null) aVal = -1; //stick nulls below 0s
-                    if (bVal === null) bVal = -1;
+                    if (aVal === null) aVal = Infinity; //stick nulls at the end, after largets
+                    if (bVal === null) bVal = Infinity;
 
                     if (aVal < bVal) return -1;
                     else if (aVal > bVal) return 1;
@@ -313,7 +313,7 @@ function setup(data) {
             .style("vertical-align", "top")
             .style("display", "inline-block")
             .style("width", ($(window).width() - leftWidth - 40) + "px")
-            .style("overflow-x", "auto")
+            .style("overflow-x", "scroll")
 
         graphWrapper.append("svg")
             .style("vertical-align", "top")
