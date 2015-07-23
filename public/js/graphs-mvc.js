@@ -507,8 +507,6 @@ function setup(data) {
             });            
 
         lefts.append("div") //importance
-            .style("width",$(".featureWindow").css("width"))
-            .append("div")
             .text(function (d) {
                 return d.importance;
             })
