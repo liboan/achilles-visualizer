@@ -1367,7 +1367,7 @@ function setup(data) {
                 return d;
             });
 
-        if (data.features[graph].type === "mut") { //add mutations to tooltip if it's a mut feature
+        if (graph !== "target" && data.features[graph].type === "mut") { //add mutations to tooltip if it's a mut feature
             for (var i = 0; i < a.mutations.length; i++) {
                 if (a.mutations[i].feature === data.features[graph].name && a.mutations[i].cellline === data.cellline[indices[index]]) {
                     tooltip.append("div")
