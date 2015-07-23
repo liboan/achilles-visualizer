@@ -72,7 +72,7 @@ function setup(data) {
 
     //////CONTROLLER//////
 
-    function filter(lineage) { // lineage = string from filterOptions, contained by some cell line names
+    function filterCellLines(lineage) { // lineage = string from filterOptions, contained by some cell line names
         indices = []; //fresh start for filtering.
 
         for (var i = 0; i < data.cellline.length; i++) { //check each cell line name for lineage string
@@ -84,6 +84,8 @@ function setup(data) {
         for (var i = 0; i < data.features.length; i++) {
             updateGraph(i);
         };  
+
+        sortGraphValues();
     }
 
     function sortGraphValues() { 
@@ -175,7 +177,7 @@ function setup(data) {
         $("#zScoreCheck").click(toggleZScore);
 
         $("#filter").change(function () {
-            filter($("#filter option:selected").text());
+            filterCellLines($("#filter option:selected").text());
         });
 
         $("#background").click(toggleBackground);
@@ -235,12 +237,6 @@ function setup(data) {
         });     
     }
 
-    //for testing & debugging
-    // sort(2);
-    // filter("BREAST");
-    // sort(1);
-
-
     //////VIEW//////
 
     /*  Terminology:
@@ -254,8 +250,8 @@ function setup(data) {
     var graphLeftPadding = 40;
     var graphTopPadding = 5;
     var barWidth;
-    var scatterHeight = 500; //Scatter dimensions also used for box plots.
-    var scatterWidth = 500;
+    var scatterHeight = 450; //Scatter dimensions also used for box plots.
+    var scatterWidth = 450;
     var scatterLeftPadding = 50;
     var scatterTopPadding = 50;
 
@@ -1490,9 +1486,10 @@ function setup(data) {
             .style("text-align", "center");
 
         var bucketMemberWrapper = tooltip.append("div")
+            .style("background-color", "rgb(240,240,240)")
             .style("display", "inline-block")
             .style("width", "inherit")
-            .style("height", "310px") //hardcoded
+            .style("height", (scatterHeight - 190) + "px") //hardcoded
             .style("overflow-y", "auto");
 
 
