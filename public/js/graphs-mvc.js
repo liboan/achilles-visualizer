@@ -717,7 +717,7 @@ function setup(data) {
 
             graph.append("text") //label
                 .text(function () {
-                    if (zScoreState) return "z-score";
+                    if (zScoreState && id !== "target") return "z-score";
                     else return "value";
                 })
                 .attr("text-anchor","middle")
