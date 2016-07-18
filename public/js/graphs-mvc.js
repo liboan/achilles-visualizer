@@ -503,7 +503,7 @@ function setup(data) {
                 if (lociColors.hasOwnProperty(d.loci)) return lociColors[d.loci];
             })
             .text(function (d) {
-                return "Loci: " + d.loci;
+                if (d.loci) return "Loci: " + d.loci;
             });            
 
         lefts.append("div") //importance
@@ -553,18 +553,18 @@ function setup(data) {
         moreInfo.append("div")
             .style("margin-top", "2px")
             .text(function (d) {
-                return d.gene_symbol + " " + d.description;
+                if (d.gene_symbol && d.description) return d.gene_symbol + " " + d.description;
             });
 
         moreInfo.append("div")
             .style("margin-top","2px")
             .append("a")
             .text(function (d) {
-                return "TumorPortal entry for " + d.gene_symbol;
+                if (d.gene_symbol) return "TumorPortal entry for " + d.gene_symbol;
             })
             .attr("target", "blank")
             .attr("href", function (d) {
-                return "http://www.tumorportal.org/view?geneSymbol=" + d.gene_symbol;
+                if (d.gene_symbol) return "http://www.tumorportal.org/view?geneSymbol=" + d.gene_symbol;
             });
 
         //////Graphs//////
