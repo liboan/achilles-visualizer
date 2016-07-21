@@ -13,6 +13,8 @@ function getData() {
         $.getJSON("/mut", function (mut) {
             data["mutations"] = mut;
             setup(data);
+        }).error(function () {
+            setup(data);
         });
     });
 }
