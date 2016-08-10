@@ -1056,12 +1056,270 @@ function setup(data) {
             });         
     }
 
-    function updateBoxPlot(id, type) {  //groups the celllines by presence of mutation, and plots their prediction or target value    
-        //id = int, index of feature. type = string, "p" = prediction, "t" = target        
-        var yMin = Infinity, yMax = -Infinity; //find extent of data
+    // function updateBoxPlot(id, type) {  //groups the celllines by presence of mutation, and plots their prediction or target value    
+    //     //id = int, index of feature. type = string, "p" = prediction, "t" = target        
+    //     var yMin = Infinity, yMax = -Infinity; //find extent of data
 
-        var buckets = [[], [], []]; //buckets[0] is for mutation values of 0, [1] for 1, [2] for 2
-                                    //for each bucket member, [pred/targ val, index]
+    //     var buckets = [[], [], []]; //buckets[0] is for mutation values of 0, [1] for 1, [2] for 2
+    //                                 //for each bucket member, [pred/targ val, index]
+
+    //     var output; //depending on type, either data.predictions or data.target. Makes stuff simpler.
+
+    //     switch (type) {
+    //         case "p":
+    //             output = data.predictions;
+    //             break;
+    //         case "t":
+    //             output = data.target;
+    //             break;
+    //         default:
+    //             output = data.predictions;
+    //     }        
+
+    //     for (var i = 0; i < indices.length; i++) { //while doing so, sort data into three bins
+    //         yMin = Math.min(yMin, data.predictions[indices[i]], data.target[indices[i]]);
+    //         yMax = Math.max(yMax, data.predictions[indices[i]], data.target[indices[i]]);
+
+    //         //console.log(data.features[id].values[indices[i]]);
+
+    //         if (data.features[id].values[indices[i]] !== null) {
+    //             buckets[data.features[id].values[indices[i]]].push([output[indices[i]], indices[i]]);
+    //         }
+    //     };
+    //     //console.log([yMin,yMax]);
+
+    //     for (var i = 0; i < buckets.length; i++) {
+    //         buckets[i].sort(function (a, b) {
+    //             return a[0] - b[0];
+    //         });
+    //     };
+
+    //     var plot = d3.select("#f" + id + type);
+
+    //     plot.selectAll("*").remove();
+
+    //     var y = d3.scale.linear() //set up scale
+    //         .domain([yMin,yMax])
+    //         .range([scatterHeight - scatterTopPadding, scatterTopPadding]);
+
+    //     var yAxis = d3.svg.axis() //set up y-axis
+    //         .scale(y)
+    //         .orient("left")
+    //         .ticks(5);
+
+    //     plot.append("g") //add axis to svg
+    //         .attr("transform", "translate(" + scatterLeftPadding + ",0)")
+    //         .call(yAxis)
+    //         .selectAll("path")
+    //         .style("stroke-width", "1px")
+    //         .style("stroke","black")
+    //         .style("fill","none");
+
+    //     var x = d3.scale.ordinal() //set up scale
+    //         .domain(["None", "Heterozygous", "Homozygous"])
+    //         .rangeRoundBands([scatterLeftPadding, scatterWidth - scatterLeftPadding],1)
+
+    //     var xAxis = d3.svg.axis() //set up x-axis
+    //         .scale(x)
+    //         .orient("bottom")
+
+    //     plot.append("g") //add axis to svg
+    //         .attr("transform", "translate(0," + (scatterHeight - scatterTopPadding) + ")")
+    //         .call(xAxis)
+    //         .selectAll("path")
+    //         .style("stroke-width", "1px")
+    //         .style("stroke","black")
+    //         .style("fill","none");
+
+    //     plot.append("text") //y-axis label
+    //         .attr("x", scatterLeftPadding - 30)
+    //         .attr("y", scatterHeight/2)
+    //         .style("font-family", "Arial")
+    //         .attr("transform", "rotate(270 " + (scatterLeftPadding - 30) + "," + (scatterHeight/2) + ")")
+    //         .attr("text-anchor", "middle")
+    //         .text(function () {
+    //             switch (type) {
+    //                 case "p": 
+    //                     return data.target_name + " Predicted Dependency";
+    //                 case "t":
+    //                     return data.target_name + " Target Dependency";
+    //             }
+    //         });     
+
+    //     plot.append("text") //x-axis label
+    //         .attr("x", scatterWidth/2)
+    //         .attr("y", scatterHeight - scatterTopPadding + 32)
+    //         .style("font", "14px Arial")
+    //         .attr("text-anchor", "middle")
+    //         .text(function () {
+    //             return "Mutation in " + data.features[id].name;
+    //         });
+
+    //     plot.append("text")
+    //         .attr("x", scatterWidth/2)
+    //         .attr("y", 40)
+    //         .style("font", "14px Arial")
+    //         .attr("text-anchor", "middle")
+    //         .text("Click box plots to show list of cell lines & mutations")            
+
+    //     var boxes = plot.selectAll("g .boxPlot")
+    //         .data(buckets)
+    //         .enter()
+    //         .append("g")
+    //         .attr("class", "boxPlot");
+
+    //     function getElement(bucket, n) { //because bucket elements are now arrays, return an array of the nth element of bucket elements (values)
+    //         var values = [];
+    //         bucket.forEach(function (x) {
+    //             values.push(x[n]); //push the first element of the bucket element (value)
+    //         });
+    //         return values;
+    //     }
+
+    //     boxes.append("rect") //rectangles for interquartile range
+    //         .attr("x", function (d, i) { //because we bound buckets, d is going to be the array of data values.
+    //             return 125 + 100 * i; //tick marks are @ 150, 250, 350. Start 25 before that
+    //         })
+    //         .attr("y", function (d, i) {
+    //             return y(d3.quantile(getElement(d,0), 0.75)); //top of box starts at third quartile (scaled)
+    //         })
+    //         .attr("width", 50)
+    //         .attr("height", function (d) {
+    //             return y(d3.quantile(getElement(d,0), 0.25)) - y(d3.quantile(getElement(d,0), 0.75));
+    //         })
+    //         .style("stroke", "black")
+    //         .style("fill", "none");
+
+    //     boxes.append("line") //max line
+    //         .attr("x1", function (d, i) {
+    //             return 125 + 100 * i; 
+    //         })
+    //         .attr("x2", function (d, i) {
+    //             return 125 + 100 * i + 50;
+    //         })
+    //         .attr("y1", function (d) {
+    //             return y(d3.max(getElement(d,0)));
+    //         })
+    //         .attr("y2", function (d) {
+    //             return y(d3.max(getElement(d,0)));
+    //         })
+    //         .style("stroke", "black")
+    //         .style("stroke-width", "2px");
+
+    //     boxes.append("line") //min line
+    //         .attr("x1", function (d, i) {
+    //             return 125 + 100 * i; 
+    //         })
+    //         .attr("x2", function (d, i) {
+    //             return 125 + 100 * i + 50;
+    //         })
+    //         .attr("y1", function (d) {
+    //             return y(d3.min(getElement(d,0)));
+    //         })
+    //         .attr("y2", function (d) {
+    //             return y(d3.min(getElement(d,0)));
+    //         })
+    //         .style("stroke","black")            
+    //         .style("stroke-width", "2px");   
+
+    //     boxes.append("line") //median line
+    //         .attr("x1", function (d, i) {
+    //             return 125 + 100 * i; 
+    //         })
+    //         .attr("x2", function (d, i) {
+    //             return 125 + 100 * i + 50;
+    //         })
+    //         .attr("y1", function (d) {
+    //             return y(d3.median(getElement(d,0)));
+    //         })
+    //         .attr("y2", function (d) {
+    //             return y(d3.median(getElement(d,0)));
+    //         })
+    //         .style("stroke", "black")
+    //         .style("stroke-width", "2px");
+
+    //     boxes.append("line") //top whisker             
+    //         .attr("x1", function (d, i) {
+    //             return 150 + 100 * i;
+    //         })
+    //         .attr("x2", function (d, i) {
+    //             return 150 + 100 * i;
+    //         })
+    //         .attr("y1", function (d) {
+    //             return y(d3.max(getElement(d,0)));
+    //         })
+    //         .attr("y2", function (d) {
+    //             return y(d3.quantile(getElement(d,0), 0.75));
+    //         })
+    //         .style("stroke", "black")
+    //         .style("stroke-width", "1px");
+
+    //     boxes.append("line") //bottom whisker             
+    //         .attr("x1", function (d, i) {
+    //             return 150 + 100 * i;
+    //         })
+    //         .attr("x2", function (d, i) {
+    //             return 150 + 100 * i;
+    //         })
+    //         .attr("y1", function (d) {
+    //             return y(d3.min(getElement(d,0)));
+    //         })
+    //         .attr("y2", function (d) {
+    //             return y(d3.quantile(getElement(d,0), 0.25));
+    //         })
+    //         .style("stroke", "black")
+    //         .style("stroke-width", "1px");
+
+    //     boxes.append("rect")
+    //         .attr("x", function (d, i) { 
+    //             return 125 + 100 * i; 
+    //         })
+    //         .attr("y", scatterTopPadding)
+    //         .attr("width", 50)
+    //         .attr("height", scatterHeight - 2 * scatterTopPadding)
+    //         .attr("fill", "gray")
+    //         .attr("pointer-events", "all")
+    //         .attr("fill-opacity", 0.0)
+    //         .on("mouseover", function () {
+    //             d3.select(this).attr("fill-opacity", 0.2);
+    //         })
+    //         .on("mouseout", function () {
+    //             d3.select(this).attr("fill-opacity", 0.0);
+    //         })
+    //         .on("click", function (d) {
+    //             var feature = $(boxes[0][0]).parent().parent().parent().attr("id"); //get id of the feature window
+    //             var boxIndex = (parseInt($(this).attr("x")) - 125)/100; //working backwards to get the box's index :-/ 
+    //             var bucketMemberIndices = getElement(d, 1); //get indices of bucket members
+
+    //             var bucketMembers = [];
+
+    //             bucketMemberIndices.sort(function (a, b) { //comparing two indices.
+    //                 var aString = data.cellline[a];
+    //                 var bString = data.cellline[b];
+
+    //                 var aLineage = aString.substring(aString.indexOf("_") + 1); //to sort by lineage, chop off stuff up to first underscore
+    //                 var bLineage = bString.substring(bString.indexOf("_") + 1); 
+
+    //                 if (aLineage < bLineage) return -1;
+    //                 else if (aLineage > bLineage) return 1;
+    //                 else return 0;
+
+    //             });
+
+    //             bucketMemberIndices.forEach(function (x) {
+    //                 bucketMembers.push(data.cellline[x]);
+    //             });
+
+    //             var bucketNumbers = [d3.min(getElement(d,0)), d3.quantile(getElement(d,0), 0.25), d3.median(getElement(d,0)),
+    //                                  d3.quantile(getElement(d,0), 0.75), d3.max(getElement(d,0))];                
+
+    //             updateBoxTooltip(feature, boxIndex, bucketMembers, bucketNumbers);
+    //         });
+    // }
+
+    function updateBoxPlot(id, type) { //groups the celllines by presence of mutation, and plots their prediction or target value    
+        //id = int, index of feature. type = string, "p" = prediction, "t" = target        
+        var yMin = Infinity, yMax = -Infinity; 
 
         var output; //depending on type, either data.predictions or data.target. Makes stuff simpler.
 
@@ -1074,25 +1332,38 @@ function setup(data) {
                 break;
             default:
                 output = data.predictions;
-        }        
+        }
 
-        for (var i = 0; i < indices.length; i++) { //while doing so, sort data into three bins
+        // Group dependency scores into buckets (each feature score gets a bucket)
+        var buckets = {}; //keys are the feature values, values are arrays of target/pred values
+
+        for (var i = 0; i < indices.length; i++) {
+            var featureVal = data.features[id].values[indices[i]];
+
+            // iterate over all predictions and targets and sort into buckets
+
             yMin = Math.min(yMin, data.predictions[indices[i]], data.target[indices[i]]);
             yMax = Math.max(yMax, data.predictions[indices[i]], data.target[indices[i]]);
 
-            //console.log(data.features[id].values[indices[i]]);
-
-            if (data.features[id].values[indices[i]] !== null) {
-                buckets[data.features[id].values[indices[i]]].push([output[indices[i]], indices[i]]);
+            // if key is in buckets, add to the array, if not than start a new one
+            if (featureVal !== null) {
+                if (featureVal in buckets) {
+                    // access the property value in buckets by its key and push the pred/target value
+                    buckets[featureVal.toString()].push(output[indices[i]]); 
+                } else {
+                    // create an array with the pred/target value as the first member
+                    buckets[featureVal.toString()] = [output[indices[i]]];
+                }
             }
-        };
-        //console.log([yMin,yMax]);
 
-        for (var i = 0; i < buckets.length; i++) {
-            buckets[i].sort(function (a, b) {
-                return a[0] - b[0];
+        }
+
+        // now sort each array
+        for (i in buckets) {
+            buckets[i].sort(function (a,b) {
+                return b - a;
             });
-        };
+        }
 
         var plot = d3.select("#f" + id + type);
 
@@ -1101,6 +1372,8 @@ function setup(data) {
         var y = d3.scale.linear() //set up scale
             .domain([yMin,yMax])
             .range([scatterHeight - scatterTopPadding, scatterTopPadding]);
+
+ 
 
         var yAxis = d3.svg.axis() //set up y-axis
             .scale(y)
@@ -1115,13 +1388,14 @@ function setup(data) {
             .style("stroke","black")
             .style("fill","none");
 
-        var x = d3.scale.ordinal() //set up scale
-            .domain(["None", "Heterozygous", "Homozygous"])
-            .rangeRoundBands([scatterLeftPadding, scatterWidth - scatterLeftPadding],1)
+        // create ordinal scale, each key gets a band
+        var x = d3.scale.ordinal()
+            .domain(Object.keys(buckets))
+            .rangeRoundBands([scatterLeftPadding, scatterWidth - scatterLeftPadding], 0.5, 0.5);
 
         var xAxis = d3.svg.axis() //set up x-axis
             .scale(x)
-            .orient("bottom")
+            .orient("bottom");
 
         plot.append("g") //add axis to svg
             .attr("transform", "translate(0," + (scatterHeight - scatterTopPadding) + ")")
@@ -1160,161 +1434,119 @@ function setup(data) {
             .attr("y", 40)
             .style("font", "14px Arial")
             .attr("text-anchor", "middle")
-            .text("Click box plots to show list of cell lines & mutations")            
+            .text("Click box plots to show list of cell lines & mutations")
+
+        // now we transform the buckets object into an array of arrays
+        bucketArray = Object.keys(buckets).map(function(key) { return buckets[key]; });
 
         var boxes = plot.selectAll("g .boxPlot")
-            .data(buckets)
+            .data(bucketArray)
             .enter()
             .append("g")
-            .attr("class", "boxPlot");
+            .attr("class", "boxPlot");   
 
-        function getElement(bucket, n) { //because bucket elements are now arrays, return an array of the nth element of bucket elements (values)
-            var values = [];
-            bucket.forEach(function (x) {
-                values.push(x[n]); //push the first element of the bucket element (value)
-            });
-            return values;
-        }
-
-        boxes.append("rect") //rectangles for interquartile range
-            .attr("x", function (d, i) { //because we bound buckets, d is going to be the array of data values.
-                return 125 + 100 * i; //tick marks are @ 150, 250, 350. Start 25 before that
+        // box from Q1 to Q3
+        boxes.append("rect")
+            .attr("x", function (d, i) { //d: the array of data values. i: the index
+                return x.range()[i]; // i-th band on the axis
             })
             .attr("y", function (d, i) {
-                return y(d3.quantile(getElement(d,0), 0.75)); //top of box starts at third quartile (scaled)
+                return y(d3.quantile(d, 0.25));
             })
-            .attr("width", 50)
-            .attr("height", function (d) {
-                return y(d3.quantile(getElement(d,0), 0.25)) - y(d3.quantile(getElement(d,0), 0.75));
+            .attr("height", function (d, i) {
+                return Math.max(1, y(d3.quantile(d, 0.75)) - y(d3.quantile(d, 0.25)));
+            })
+            .attr("width", function (d, i) {
+                return x.rangeBand();
             })
             .style("stroke", "black")
             .style("fill", "none");
 
-        boxes.append("line") //max line
+        // lines at min and max
+        boxes.append("line")
             .attr("x1", function (d, i) {
-                return 125 + 100 * i; 
+                return x.range()[i];
+            })
+            .attr("y1", function (d, i) {
+                return y(d3.min(d));
             })
             .attr("x2", function (d, i) {
-                return 125 + 100 * i + 50;
+                return x.range()[i] + x.rangeBand();
             })
-            .attr("y1", function (d) {
-                return y(d3.max(getElement(d,0)));
-            })
-            .attr("y2", function (d) {
-                return y(d3.max(getElement(d,0)));
+            .attr("y2", function (d, i) {
+                return y(d3.min(d));
             })
             .style("stroke", "black")
             .style("stroke-width", "2px");
 
-        boxes.append("line") //min line
+        boxes.append("line")
             .attr("x1", function (d, i) {
-                return 125 + 100 * i; 
+                return x.range()[i];
+            })
+            .attr("y1", function (d, i) {
+                return y(d3.max(d));
             })
             .attr("x2", function (d, i) {
-                return 125 + 100 * i + 50;
+                return x.range()[i] + x.rangeBand();
             })
-            .attr("y1", function (d) {
-                return y(d3.min(getElement(d,0)));
-            })
-            .attr("y2", function (d) {
-                return y(d3.min(getElement(d,0)));
-            })
-            .style("stroke","black")            
-            .style("stroke-width", "2px");   
-
-        boxes.append("line") //median line
-            .attr("x1", function (d, i) {
-                return 125 + 100 * i; 
-            })
-            .attr("x2", function (d, i) {
-                return 125 + 100 * i + 50;
-            })
-            .attr("y1", function (d) {
-                return y(d3.median(getElement(d,0)));
-            })
-            .attr("y2", function (d) {
-                return y(d3.median(getElement(d,0)));
+            .attr("y2", function (d, i) {
+                return y(d3.max(d));
             })
             .style("stroke", "black")
             .style("stroke-width", "2px");
 
-        boxes.append("line") //top whisker             
+        // median
+        boxes.append("line")
             .attr("x1", function (d, i) {
-                return 150 + 100 * i;
+                return x.range()[i];
+            })
+            .attr("y1", function (d, i) {
+                return y(d3.median(d));
             })
             .attr("x2", function (d, i) {
-                return 150 + 100 * i;
+                return x.range()[i] + x.rangeBand();
             })
-            .attr("y1", function (d) {
-                return y(d3.max(getElement(d,0)));
-            })
-            .attr("y2", function (d) {
-                return y(d3.quantile(getElement(d,0), 0.75));
+            .attr("y2", function (d, i) {
+                return y(d3.median(d));
             })
             .style("stroke", "black")
-            .style("stroke-width", "1px");
+            .style("stroke-width", "2px");
 
-        boxes.append("line") //bottom whisker             
+        // Whiskers
+        boxes.append("line")
             .attr("x1", function (d, i) {
-                return 150 + 100 * i;
+                return x.range()[i] + x.rangeBand()/2;
+            })
+            .attr("y1", function (d, i) {
+                return y(d3.max(d));
             })
             .attr("x2", function (d, i) {
-                return 150 + 100 * i;
+                return x.range()[i] + x.rangeBand()/2;
             })
-            .attr("y1", function (d) {
-                return y(d3.min(getElement(d,0)));
-            })
-            .attr("y2", function (d) {
-                return y(d3.quantile(getElement(d,0), 0.25));
+            .attr("y2", function (d, i) {
+                return y(d3.quantile(d, 0.25));
             })
             .style("stroke", "black")
-            .style("stroke-width", "1px");
+            .style("stroke-width", "2px");
 
-        boxes.append("rect")
-            .attr("x", function (d, i) { 
-                return 125 + 100 * i; 
+        boxes.append("line")
+            .attr("x1", function (d, i) {
+                return x.range()[i] + x.rangeBand()/2;
             })
-            .attr("y", scatterTopPadding)
-            .attr("width", 50)
-            .attr("height", scatterHeight - 2 * scatterTopPadding)
-            .attr("fill", "gray")
-            .attr("pointer-events", "all")
-            .attr("fill-opacity", 0.0)
-            .on("mouseover", function () {
-                d3.select(this).attr("fill-opacity", 0.2);
+            .attr("y1", function (d, i) {
+                return y(d3.min(d));
             })
-            .on("mouseout", function () {
-                d3.select(this).attr("fill-opacity", 0.0);
+            .attr("x2", function (d, i) {
+                return x.range()[i] + x.rangeBand()/2;
             })
-            .on("click", function (d) {
-                var feature = $(boxes[0][0]).parent().parent().parent().attr("id"); //get id of the feature window
-                var boxIndex = (parseInt($(this).attr("x")) - 125)/100; //working backwards to get the box's index :-/ 
-                var bucketMemberIndices = getElement(d, 1); //get indices of bucket members
+            .attr("y2", function (d, i) {
+                return y(d3.quantile(d, 0.75));
+            })
+            .style("stroke", "black")
+            .style("stroke-width", "2px");
 
-                var bucketMembers = [];
 
-                bucketMemberIndices.sort(function (a, b) { //comparing two indices.
-                    var aString = data.cellline[a];
-                    var bString = data.cellline[b];
 
-                    var aLineage = aString.substring(aString.indexOf("_") + 1); //to sort by lineage, chop off stuff up to first underscore
-                    var bLineage = bString.substring(bString.indexOf("_") + 1); 
-
-                    if (aLineage < bLineage) return -1;
-                    else if (aLineage > bLineage) return 1;
-                    else return 0;
-
-                });
-
-                bucketMemberIndices.forEach(function (x) {
-                    bucketMembers.push(data.cellline[x]);
-                });
-
-                var bucketNumbers = [d3.min(getElement(d,0)), d3.quantile(getElement(d,0), 0.25), d3.median(getElement(d,0)),
-                                     d3.quantile(getElement(d,0), 0.75), d3.max(getElement(d,0))];                
-
-                updateBoxTooltip(feature, boxIndex, bucketMembers, bucketNumbers);
-            });
     }
 
     function updateGraphTooltip(graph, xPos) { //Updates the main graph tooltip whenever mouse position shifts, also darkens the appropriate rect
